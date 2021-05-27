@@ -4,7 +4,7 @@ Compile via:
 
 > root
 
-> .L Analyze.C+
+> root[]  .L Analyze.C+
 
 Make a list of paths to the output files from the Fun4All_G4_HybridGEM.C script (name it TreeList.txt)
 Run the runningScript.sh to run the RunAnalyze.C over the files
