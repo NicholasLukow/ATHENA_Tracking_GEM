@@ -1,3 +1,8 @@
+This contains the code for a hybrid tracking detector with GEMs. 
+The current model uses the 2m4o BMT from Saclay, GEM Disks from the EIC Toy Model, and modified simple Si tracker (vertexing, barrel, and disks) based on Rey's code using parameters from Table 11.12 in the Yellow Report.
+There is also a simple mid-rapidity Beryllium beam pipe as well as optional forward and backward beampipe extensions.
+
+
 In order to make use of the GEMs, you must first install the EicToyModel. This can be found here: https://github.com/eic/EicToyModel
 Follow the install instructions there.
 
