@@ -82,6 +82,8 @@ void Fun4All_G4_HybridGEM(
 			int nEvents = -1,			// number of events
 			double pmin = 0., 			// GeV/c
 			double pmax = 30., 			// GeV/c
+			double etamin = -3.5,
+			double etamax = 3.5,
 			int magnetic_field = 4, 		// Magnetic field setting
 			TString out_name = "out_TrackingStudy")	// output filename
 {	
@@ -112,7 +114,7 @@ void Fun4All_G4_HybridGEM(
 	gen->set_vtx(0,0,0);			// Vertex generation range
 	gen->set_mom_range(pmin,pmax);		// Momentum generation range in GeV/c
 	gen->set_z_range(0.,0.);
-	gen->set_eta_range(0.,0.5);//4.0
+	gen->set_eta_range(etamin,etamax);//4.0
 	gen->set_phi_range(0,2.*TMath::Pi());
 	// --------------------------------------------------------------------------------------
 	// Particle generator flat in pT
@@ -121,7 +123,7 @@ void Fun4All_G4_HybridGEM(
 	gen_pT->set_vtx(0,0,0);                    // Vertex generation range
 	gen_pT->set_pT_range(pmin,pmax);         // Momentum generation range in GeV/c
 	gen_pT->set_z_range(0.,0.);
-	gen_pT->set_eta_range(-3.5,3.5);               // Detector coverage corresponds to |η|< 4
+	gen_pT->set_eta_range(etamin, etamax);               // Detector coverage corresponds to |η|< 4
 	gen_pT->set_phi_range(0.,2.*TMath::Pi());
 	// ======================================================================================================
 	if     (particle_gen==1){se->registerSubsystem(  gen); cout << "Using particle generator"     << endl;}
@@ -574,7 +576,7 @@ lter acceptance
 
 	// ======================================================================================================
 	// IOManagers...
-	const std::string dst_name = std::string(out_name)+std::string(B_label)+"_G4LBLVtx.root";	
+	const std::string dst_name = "DSTFolder/"+std::string(out_name)+std::string(B_label)+"_G4GEM.root";	
 	Fun4AllDstOutputManager *out = new Fun4AllDstOutputManager("DSTOUT",dst_name);
 	out->Verbosity(0);
 	se->registerOutputManager(out);
