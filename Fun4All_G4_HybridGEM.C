@@ -84,7 +84,7 @@ void Fun4All_G4_HybridGEM(
 			double pmax = 30., 			// GeV/c
 			double etamin = -3.5,
 			double etamax = 3.5,
-			int magnetic_field = 4, 		// Magnetic field setting
+			int magnetic_field = 5, 		// Magnetic field setting
 			TString out_name = "out_TrackingStudy")	// output filename
 {	
 	// ======================================================================================================
@@ -152,6 +152,10 @@ void Fun4All_G4_HybridGEM(
 	else if(magnetic_field==4){     // Beast 3.0T map
 		B_label = "_Beast";
 		g4Reco->set_field_map(string(getenv("CALIBRATIONROOT")) + string("/Field/Map/mfield.4col.dat"), PHFieldConfig::kFieldBeast);
+	}
+	else if(magnetic_field==5){     // ATHENA 3.0T map
+		B_label = "_ATHENA";
+		g4Reco->set_field_map( string("../BeastMagneticField/data/EIC_v.0.1.0_Magnetic_Field_Map_2021_05_28_radial_coords_[cm]_[T].401301.line.Bmap"), PHFieldConfig::kFieldBeast);
 	}
 	else{                           // The user did not provide a valid B field setting
 		cout << "User did not provide a valid magnetic field setting. Set 'magnetic_field'. Bailing out!" << endl;
