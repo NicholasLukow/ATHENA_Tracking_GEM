@@ -76,31 +76,7 @@ R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libg4example01detector.so)
 R__LOAD_LIBRARY(libg4histos.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
-/*
-void MakeGEM(EicRootGemSubsystem** fgt, double Z, double EtaMin, double InnerRadius, double NModules )
-{
-	    double Height = TMath::Abs(Z)*TMath::Tan(2*TMath::ATan(TMath::Exp(-1*EtaMin))); 
-	    double ActiveHeight = Height - InnerRadius; //NB: this may not account for the frame material thickness at the outer edge of the module, so it may not precisely get the full eta coverage
-	    double CenterRadius = 0.5*ActiveHeight + InnerRadius;
-	    double TopWidth = 2*Height*TMath::Tan(TMath::Pi()/NModules);
-	    double BottomWidth = (TopWidth/Height)*InnerRadius;
-	    auto sbstemp = new GemModule();
-	    sbstemp->SetDoubleVariable("mDriftFoilCopperThickness", 5 * etm::um);
-	    sbstemp->SetDoubleVariable("mGemFoilCopperThickness", 5 * etm::um);
-	    sbstemp->SetDoubleVariable("mGemFoilKaptonThickness", 50 * etm::um);
-	    sbstemp->SetDoubleVariable("mReadoutSupportThickness", 0 * etm::um);
-	    sbstemp->SetDoubleVariable("mReadoutKaptonThickness", 50 * etm::um);
-	    sbstemp->SetDoubleVariable("mFrameThickness", 17 * etm::mm);
-	    sbstemp->SetDoubleVariable("mFrameBottomEdgeWidth", 30 * etm::mm);
-	    sbstemp->SetDoubleVariable("mFrameTopEdgeWidth", 50 * etm::mm);
-	    sbstemp->SetDoubleVariable("mFrameSideEdgeWidth", 15 * etm::mm); 
-            sbstemp->SetDoubleVariable("mEntranceWindowThickness", 25 * etm::um);
-	    sbstemp->SetDoubleVariable("mActiveWindowBottomWidth", BottomWidth * etm::mm);
-	    sbstemp->SetDoubleVariable("mActiveWindowTopWidth", TopWidth * etm::mm);
-	    sbstemp->SetDoubleVariable("mActiveWindowHeight", ActiveHeight * etm::mm);
-	    fgt->AddWheel(sbstemp, NModules, CenterRadius * etm::mm, Z * etm::mm, 0);
-}
-*/
+//Creates a GEM module with modified material
 auto ModifiedGEM()
 {
 	    auto sbstemp = new GemModule();
