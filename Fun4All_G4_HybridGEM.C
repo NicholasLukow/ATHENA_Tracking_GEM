@@ -76,7 +76,59 @@ R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libg4example01detector.so)
 R__LOAD_LIBRARY(libg4histos.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
+/*
+void MakeGEM(EicRootGemSubsystem** fgt, double Z, double EtaMin, double InnerRadius, double NModules )
+{
+	    double Height = TMath::Abs(Z)*TMath::Tan(2*TMath::ATan(TMath::Exp(-1*EtaMin))); 
+	    double ActiveHeight = Height - InnerRadius; //NB: this may not account for the frame material thickness at the outer edge of the module, so it may not precisely get the full eta coverage
+	    double CenterRadius = 0.5*ActiveHeight + InnerRadius;
+	    double TopWidth = 2*Height*TMath::Tan(TMath::Pi()/NModules);
+	    double BottomWidth = (TopWidth/Height)*InnerRadius;
+	    auto sbstemp = new GemModule();
+	    sbstemp->SetDoubleVariable("mDriftFoilCopperThickness", 5 * etm::um);
+	    sbstemp->SetDoubleVariable("mGemFoilCopperThickness", 5 * etm::um);
+	    sbstemp->SetDoubleVariable("mGemFoilKaptonThickness", 50 * etm::um);
+	    sbstemp->SetDoubleVariable("mReadoutSupportThickness", 0 * etm::um);
+	    sbstemp->SetDoubleVariable("mReadoutKaptonThickness", 50 * etm::um);
+	    sbstemp->SetDoubleVariable("mFrameThickness", 17 * etm::mm);
+	    sbstemp->SetDoubleVariable("mFrameBottomEdgeWidth", 30 * etm::mm);
+	    sbstemp->SetDoubleVariable("mFrameTopEdgeWidth", 50 * etm::mm);
+	    sbstemp->SetDoubleVariable("mFrameSideEdgeWidth", 15 * etm::mm); 
+            sbstemp->SetDoubleVariable("mEntranceWindowThickness", 25 * etm::um);
+	    sbstemp->SetDoubleVariable("mActiveWindowBottomWidth", BottomWidth * etm::mm);
+	    sbstemp->SetDoubleVariable("mActiveWindowTopWidth", TopWidth * etm::mm);
+	    sbstemp->SetDoubleVariable("mActiveWindowHeight", ActiveHeight * etm::mm);
+	    fgt->AddWheel(sbstemp, NModules, CenterRadius * etm::mm, Z * etm::mm, 0);
+}
+*/
+auto ModifiedGEM()
+{
+	    auto sbstemp = new GemModule();
+	    sbstemp->SetDoubleVariable("mDriftFoilCopperThickness", 5 * etm::um);
+	    sbstemp->SetDoubleVariable("mGemFoilCopperThickness", 5 * etm::um);
+	    sbstemp->SetDoubleVariable("mGemFoilKaptonThickness", 50 * etm::um);
+	    sbstemp->SetDoubleVariable("mReadoutSupportThickness", 0 * etm::um);
+	    sbstemp->SetDoubleVariable("mReadoutKaptonThickness", 50 * etm::um);
+	    sbstemp->SetDoubleVariable("mFrameThickness", 17 * etm::mm);
+	    sbstemp->SetDoubleVariable("mFrameBottomEdgeWidth", 30 * etm::mm);
+	    sbstemp->SetDoubleVariable("mFrameTopEdgeWidth", 50 * etm::mm);
+	    sbstemp->SetDoubleVariable("mFrameSideEdgeWidth", 15 * etm::mm); 
+            sbstemp->SetDoubleVariable("mEntranceWindowThickness", 25 * etm::um);
+	    return sbstemp;	
+}
 
+//Function to calculate the parameters for GEM disk geometry given the Z position, minimum eta covered, inner radius clearance, and the number of modules
+array<double,6> FullGEMParameters(double Z, double EtaMin, double InnerRadius, double NModules)
+{
+	    double Height = TMath::Abs(Z)*TMath::Tan(2*TMath::ATan(TMath::Exp(-1*EtaMin))); 
+	    double ActiveHeight = Height - InnerRadius; //NB: this may not account for the frame material thickness at the outer edge of the module, so it may not precisely get the full eta coverage
+	    double CenterRadius = 0.5*ActiveHeight + InnerRadius;
+	    double TopWidth = 2*Height*TMath::Tan(TMath::Pi()/NModules);
+	    double BottomWidth = (TopWidth/Height)*InnerRadius;
+
+	    array<double,6 > Params = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
+	    return Params;
+}
 
 void Fun4All_G4_HybridGEM(
 			int nEvents = -1,			// number of events
@@ -317,7 +369,8 @@ lter acceptance
 
         PHG4CylinderStripSubsystem *example01;
         const double prapidity =1;
-        double bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*80;
+        //double bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*80;
+        double bmt_length = 250;
         for (int ilayer = 0; ilayer< 6; ilayer++){
                 example01 = new PHG4CylinderStripSubsystem("BMT",ilayer);
                 example01->set_double_param("radius", BMT_r[ilayer]);
@@ -350,12 +403,7 @@ lter acceptance
           //fgt->SetTGeoGeometryCheckPrecision(0.000001 * etm::um);                                                                                  \
                                                                              
                     {
-            auto sbs = new GemModule();
             // See other GemModule class data in GemGeoParData.h;                                                                                    \
-                                                                                                                                                      
-            sbs->SetDoubleVariable("mFrameBottomEdgeWidth", 30 * etm::mm);
-            
-
             // Compose sectors; parameters are:                                                                                                      \
                                                                                                                                                       
             //   - layer description (obviously can mix different geometries);                                                                       \
@@ -366,32 +414,65 @@ lter acceptance
             //   - Z offset from 0.0 (default);                                                                                                      \
                                                                                                                                                       
             //   - azimuthal rotation from 0.0 (default);                                                                                            \
-	    
-	    //sbs->SetDoubleVariable("mActiveWindowBottomWidth", 30 * etm::mm);
-	    //sbs->SetDoubleVariable("mActiveWindowTopWidth", 430 * etm::mm);
-	    //sbs->SetDoubleVariable("mActiveWindowHeight", 700 * etm::mm);
-            
-	    fgt->AddWheel(sbs, 12, 420 * etm::mm, 1300 * etm::mm, 0);
-            fgt->AddWheel(sbs, 12, 420 * etm::mm, 1400 * etm::mm, 0);
-            //fgt->AddWheel(sbs, 24, 840 * etm::mm, 1500 * etm::mm, 0);
-            fgt->AddWheel(sbs, 12, 420 * etm::mm, -1300 * etm::mm, 0);
-            fgt->AddWheel(sbs, 12, 420 * etm::mm, -1400 * etm::mm, 0);
-            
-	    /*                                                                                                                                          
-	    fgt->AddWheel(sbs, 12, 420 * etm::mm, 1200 * etm::mm, 0);
-            fgt->AddWheel(sbs, 12, 420 * etm::mm, 1300 * etm::mm, 0);
-            //fgt->AddWheel(sbs, 24, 840 * etm::mm, 1500 * etm::mm, 0);
-            fgt->AddWheel(sbs, 12, 420 * etm::mm, -1200 * etm::mm, 0);
-            fgt->AddWheel(sbs, 12, 420 * etm::mm, -1300 * etm::mm, 0);
-	   */
-	    auto sbs_2 = new GemModule();
+	   
+/*
+	    sbs->SetDoubleVariable("mDriftFoilCopperThickness", 5 * etm::um);
+	    sbs->SetDoubleVariable("mGemFoilCopperThickness", 5 * etm::um);
+	    sbs->SetDoubleVariable("mGemFoilKaptonThickness", 50 * etm::um);
+	    sbs->SetDoubleVariable("mReadoutSupportThickness", 0 * etm::um);
+	    sbs->SetDoubleVariable("mReadoutKaptonThickness", 50 * etm::um);
+	    sbs->SetDoubleVariable("mFrameThickness", 17 * etm::mm);
+	    sbs->SetDoubleVariable("mFrameBottomEdgeWidth", 30 * etm::mm);
+	    sbs->SetDoubleVariable("mFrameTopEdgeWidth", 50 * etm::mm);
+	    sbs->SetDoubleVariable("mFrameSideEdgeWidth", 15 * etm::mm);                                                                                                                      sbs->SetDoubleVariable("mEntranceWindowThickness", 25 * etm::um);
+*/	    
+
+		//FullGEMParameters() will calculate the parameters to define the geometry of the GEM disk based on the Z location, minimum eta coverage, inner radius clearance, and number of modules
  
-	    sbs_2->SetDoubleVariable("mActiveWindowBottomWidth", 60 * etm::mm);
-	    sbs_2->SetDoubleVariable("mActiveWindowTopWidth", 860 * etm::mm);
-	    sbs_2->SetDoubleVariable("mActiveWindowHeight", 1400 * etm::mm);
-            fgt->AddWheel(sbs_2, 12, 840 * etm::mm, 3000 * etm::mm, 0); //1500
-            fgt->AddWheel(sbs_2, 12, 840 * etm::mm, -1900 * etm::mm, 0); //1500
-          }
+	    //Hadron Endcap GEM Disks
+	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
+	    array<double,6> Params1 = FullGEMParameters(1300, 1.3, 140, 12);
+	    auto sbs1 = ModifiedGEM();    
+	    //auto sbs1 = ModifiedGEM();// creates GEM Module with modified material
+	    sbs1->SetDoubleVariable("mActiveWindowBottomWidth", Params1[3] * etm::mm);
+	    sbs1->SetDoubleVariable("mActiveWindowTopWidth", Params1[2] * etm::mm);
+	    sbs1->SetDoubleVariable("mActiveWindowHeight", Params1[0] * etm::mm);
+	    fgt->AddWheel(sbs1, Params1[5], Params1[1] * etm::mm, Params1[4] * etm::mm, 0);
+	    fgt->AddWheel(sbs1, Params1[5], Params1[1] * etm::mm, (Params1[4]+100) * etm::mm, 0);
+	
+
+	    //Electron Endcap GEM Disks
+	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
+	    array<double,6> Params2 = FullGEMParameters(-1300, 1.3, 100, 12);
+	    auto sbs2 = ModifiedGEM();    
+	    sbs2->SetDoubleVariable("mActiveWindowBottomWidth", Params2[3] * etm::mm);
+	    sbs2->SetDoubleVariable("mActiveWindowTopWidth", Params2[2] * etm::mm);
+	    sbs2->SetDoubleVariable("mActiveWindowHeight", Params2[0] * etm::mm);
+	    fgt->AddWheel(sbs2, Params2[5], Params2[1] * etm::mm, Params2[4] * etm::mm, 0);
+	    fgt->AddWheel(sbs2, Params2[5], Params2[1] * etm::mm, (Params2[4]-100) * etm::mm, 0);
+
+
+	    //Far Hadron Side GEM disk
+	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
+	    array<double,6> Params3 = FullGEMParameters(3000, 1.3, 210, 12);
+	    auto sbs3 = ModifiedGEM();    
+	    sbs3->SetDoubleVariable("mActiveWindowBottomWidth", Params3[3] * etm::mm);
+	    sbs3->SetDoubleVariable("mActiveWindowTopWidth", Params3[2] * etm::mm);
+	    sbs3->SetDoubleVariable("mActiveWindowHeight", Params3[0] * etm::mm);
+	    fgt->AddWheel(sbs3, Params3[5], Params3[1] * etm::mm, (Params3[4]) * etm::mm, 0);
+            
+	   
+	    //Far Electron Side GEM disk
+	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
+	    array<double,6> Params4 = FullGEMParameters(-1900, 1.3, 110, 12);
+	    auto sbs4 = ModifiedGEM();    
+	    sbs4->SetDoubleVariable("mActiveWindowBottomWidth", Params4[3] * etm::mm);
+	    sbs4->SetDoubleVariable("mActiveWindowTopWidth", Params4[2] * etm::mm);
+	    sbs4->SetDoubleVariable("mActiveWindowHeight", Params4[0] * etm::mm);
+	    fgt->AddWheel(sbs4, Params4[5], Params4[1] * etm::mm, (Params4[4]) * etm::mm, 0);
+
+        
+	  }
 
           g4Reco->registerSubsystem(fgt);
         }
