@@ -76,7 +76,8 @@ R__LOAD_LIBRARY(libg4testbench.so)
 R__LOAD_LIBRARY(libg4example01detector.so)
 R__LOAD_LIBRARY(libg4histos.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
-//Creates a GEM module with modified material
+
+//Funciton to create gem module with modified material
 auto ModifiedGEM()
 {
 	    auto sbstemp = new GemModule();
@@ -91,6 +92,15 @@ auto ModifiedGEM()
 	    sbstemp->SetDoubleVariable("mFrameSideEdgeWidth", 15 * etm::mm); 
             sbstemp->SetDoubleVariable("mEntranceWindowThickness", 25 * etm::um);
 	    return sbstemp;	
+}
+//Function to make GEM disk
+void MakeGEM(array<double,6> Params, EicRootGemSubsystem *&fgt)
+{
+	    auto sbs = ModifiedGEM();// creates GEM Module with modified material
+	    sbs->SetDoubleVariable("mActiveWindowBottomWidth", Params[3] * etm::mm);
+	    sbs->SetDoubleVariable("mActiveWindowTopWidth", Params[2] * etm::mm);
+	    sbs->SetDoubleVariable("mActiveWindowHeight", Params[0] * etm::mm);
+	    fgt->AddWheel(sbs, Params[5], Params[1] * etm::mm, Params[4] * etm::mm, 0);
 }
 
 //Function to calculate the parameters for GEM disk geometry given the Z position, minimum eta covered, inner radius clearance, and the number of modules
@@ -407,45 +417,31 @@ lter acceptance
  
 	    //Hadron Endcap GEM Disks
 	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
-	    array<double,6> Params1 = FullGEMParameters(1300, 1.3, 140, 12);
-	    auto sbs1 = ModifiedGEM();    
-	    //auto sbs1 = ModifiedGEM();// creates GEM Module with modified material
-	    sbs1->SetDoubleVariable("mActiveWindowBottomWidth", Params1[3] * etm::mm);
-	    sbs1->SetDoubleVariable("mActiveWindowTopWidth", Params1[2] * etm::mm);
-	    sbs1->SetDoubleVariable("mActiveWindowHeight", Params1[0] * etm::mm);
-	    fgt->AddWheel(sbs1, Params1[5], Params1[1] * etm::mm, Params1[4] * etm::mm, 0);
-	    fgt->AddWheel(sbs1, Params1[5], Params1[1] * etm::mm, (Params1[4]+100) * etm::mm, 0);
+	    array<double,6> Params = FullGEMParameters(1300, 1.3, 140, 12);
+	    MakeGEM(Params, fgt);
+ 	    Params[4]=Params[4]+100; //Copying previous parameters but shifting in Z
+	    MakeGEM(Params, fgt);
 	
 
 	    //Electron Endcap GEM Disks
 	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
-	    array<double,6> Params2 = FullGEMParameters(-1300, 1.3, 100, 12);
-	    auto sbs2 = ModifiedGEM();    
-	    sbs2->SetDoubleVariable("mActiveWindowBottomWidth", Params2[3] * etm::mm);
-	    sbs2->SetDoubleVariable("mActiveWindowTopWidth", Params2[2] * etm::mm);
-	    sbs2->SetDoubleVariable("mActiveWindowHeight", Params2[0] * etm::mm);
-	    fgt->AddWheel(sbs2, Params2[5], Params2[1] * etm::mm, Params2[4] * etm::mm, 0);
-	    fgt->AddWheel(sbs2, Params2[5], Params2[1] * etm::mm, (Params2[4]-100) * etm::mm, 0);
+	    Params = FullGEMParameters(-1300, 1.3, 100, 12);
+	    MakeGEM(Params, fgt);
+	    Params[4]=Params[4]-100; //Copying previous parameters but shifting in Z
+	    MakeGEM(Params, fgt); 
+
 
 
 	    //Far Hadron Side GEM disk
 	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
-	    array<double,6> Params3 = FullGEMParameters(3000, 1.3, 210, 12);
-	    auto sbs3 = ModifiedGEM();    
-	    sbs3->SetDoubleVariable("mActiveWindowBottomWidth", Params3[3] * etm::mm);
-	    sbs3->SetDoubleVariable("mActiveWindowTopWidth", Params3[2] * etm::mm);
-	    sbs3->SetDoubleVariable("mActiveWindowHeight", Params3[0] * etm::mm);
-	    fgt->AddWheel(sbs3, Params3[5], Params3[1] * etm::mm, (Params3[4]) * etm::mm, 0);
+	    Params = FullGEMParameters(3000, 1.3, 210, 12);
+	    MakeGEM(Params, fgt);
             
 	   
 	    //Far Electron Side GEM disk
 	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
-	    array<double,6> Params4 = FullGEMParameters(-1900, 1.3, 110, 12);
-	    auto sbs4 = ModifiedGEM();    
-	    sbs4->SetDoubleVariable("mActiveWindowBottomWidth", Params4[3] * etm::mm);
-	    sbs4->SetDoubleVariable("mActiveWindowTopWidth", Params4[2] * etm::mm);
-	    sbs4->SetDoubleVariable("mActiveWindowHeight", Params4[0] * etm::mm);
-	    fgt->AddWheel(sbs4, Params4[5], Params4[1] * etm::mm, (Params4[4]) * etm::mm, 0);
+	    Params = FullGEMParameters(-1900, 1.3, 110, 12);
+	    MakeGEM(Params, fgt);
 
         
 	  }
