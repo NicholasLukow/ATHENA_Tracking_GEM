@@ -77,6 +77,8 @@ R__LOAD_LIBRARY(libg4example01detector.so)
 R__LOAD_LIBRARY(libg4histos.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 
+
+#ifdef _GEMS_
 //Funciton to create gem module with modified material
 auto ModifiedGEM()
 {
@@ -115,10 +117,11 @@ array<double,6> FullGEMParameters(double Z, double EtaMin, double InnerRadius, d
 	    array<double,6 > Params = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
 	    return Params;
 }
+#endif
 
 void Fun4All_G4_HybridGEM(
 			int nEvents = -1,			// number of events
-			double pmin = 0., 			// GeV/c
+			double pmin = 1., 			// GeV/c
 			double pmax = 30., 			// GeV/c
 			double etamin = -3.5,
 			double etamax = 3.5,
@@ -355,8 +358,8 @@ lter acceptance
 
         PHG4CylinderStripSubsystem *example01;
         const double prapidity =1;
-        //double bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*80;
-        double bmt_length = 250;
+        double bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*80;
+        //double bmt_length = 250;
         for (int ilayer = 0; ilayer< 6; ilayer++){
                 example01 = new PHG4CylinderStripSubsystem("BMT",ilayer);
                 example01->set_double_param("radius", BMT_r[ilayer]);
@@ -414,33 +417,55 @@ lter acceptance
 */	    
 
 		//FullGEMParameters() will calculate the parameters to define the geometry of the GEM disk based on the Z location, minimum eta coverage, inner radius clearance, and number of modules
- 
+	        //Array definition: Params[] = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
+	    
 	    //Hadron Endcap GEM Disks
 	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
-	    array<double,6> Params = FullGEMParameters(1300, 1.3, 140, 12);
+	    array<double,6> Params = FullGEMParameters(1300, 1.05, 140, 12);
 	    MakeGEM(Params, fgt);
- 	    Params[4]=Params[4]+100; //Copying previous parameters but shifting in Z
+ 	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt);
-	
+ 	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
+	    MakeGEM(Params, fgt);
+		
+		cout << "Hadron Endcap GEM Dimensions:" << endl;
+		cout << "GEM TOP WIDTH: " << Params[2] << endl;
+		cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
+			
 
 	    //Electron Endcap GEM Disks
 	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
-	    Params = FullGEMParameters(-1300, 1.3, 100, 12);
+	    Params = FullGEMParameters(-1300, 1.05, 100, 12);
 	    MakeGEM(Params, fgt);
-	    Params[4]=Params[4]-100; //Copying previous parameters but shifting in Z
+	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
+	    MakeGEM(Params, fgt); 
+	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
 
+		cout << "Electron Endcap GEM Dimensions:" << endl;
+		cout << "GEM TOP WIDTH: " << Params[2] << endl;
+		cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
 
 
 	    //Far Hadron Side GEM disk
 	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
-	    Params = FullGEMParameters(3000, 1.3, 210, 12);
+	    Params = FullGEMParameters(2950, 1.05, 210, 12);
 	    MakeGEM(Params, fgt);
+	    Params[4]=Params[4]+150; //Copying previous parameters but shifting in Z
+	    MakeGEM(Params, fgt); 
+
+	    //This will be a GEM-TRD, so the width requirement of 55cm can be safely ignored for now
+	    //Keep radii below 230 (220-230)
+	    //positions 295 and 310	
+
+		//cout << "Post-RICH GEM Dimensions:" << endl;
+		//cout << "GEM TOP WIDTH: " << Params[2] << endl;
+		//cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
             
 	   
 	    //Far Electron Side GEM disk
 	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
-	    Params = FullGEMParameters(-1900, 1.3, 110, 12);
+	    Params = FullGEMParameters(-1900, 1.05, 110, 12);
 	    MakeGEM(Params, fgt);
 
         
