@@ -19,7 +19,6 @@ using namespace std;
 
 #define _TSIZE_ 0.06
 #define _LSIZE_ 0.05
-#define _ETA_ 0 // 0: 1-1.5 1: 1.5-2 2:2-2.5 3: 2.5-3 4: 3-3.5
 
 
 void Plotter(TString infile="./Output/Histogram.root")
@@ -38,13 +37,27 @@ void Plotter(TString infile="./Output/Histogram.root")
   TFile *rootfile = new TFile(infile,"read");
   
   TH1D *Htmp;
-  
+
+
+//---------------------------------------------------------------------------------------------------------------------------------------  
+//============================================== Change Inputs Here =====================================================================
+//---------------------------------------------------------------------------------------------------------------------------------------  
 #define _NBField_ 2
 #define _NDet_ 1
 #define _NEta_ 14
 double AngleValues[_NEta_+1] = {-3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5};
 #define _NP_ 14
 double MomentumValues[_NP_+1] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20};
+
+//std::string DetVers[_NDet_] = {"noGem" ,"1ffg", "2ffg"};
+//const char *DetectorFullName[_NDet_] = {"No GEM Disks", "3Endcap/1Post-RICH GEM Disks", "3Endcap/2Post-RICH GEM Disks"};
+std::string DetVers[_NDet_] = {"2ffg"};
+const char *DetectorFullName[_NDet_] = { "3Endcap/2Post-RICH GEM Disks"};
+std::string BField[_NBField_] = {"Beast", "ATHENA"};
+const char *FieldMapName[_NBField_] = {"Beast", "ATHENA"};
+//---------------------------------------------------------------------------------------------------------------------------------------  
+//=======================================================================================================================================
+//---------------------------------------------------------------------------------------------------------------------------------------  
 
 
 
@@ -67,19 +80,12 @@ double MomentumValues[_NP_+1] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 
   }
 
 
-  //Instead of using this to make the plots, I could use this to extract the resolutions which I will then plug into the code Alexander gave me
-  //std::string DetVers[_NDet_] = {"noGem" ,"1ffg", "2ffg"};
-  //const char *DetectorFullName[_NDet_] = {"No GEM Disks", "3Endcap/1Post-RICH GEM Disks", "3Endcap/2Post-RICH GEM Disks"};
-  std::string DetVers[_NDet_] = {"2ffg"};
-  const char *DetectorFullName[_NDet_] = { "3Endcap/2Post-RICH GEM Disks"};
-  std::string BField[_NBField_] = {"Beast", "ATHENA"};
-  const char *FieldMapName[_NBField_] = {"Beast", "ATHENA"};
 
 
   double Resolution[_NEta_][_NP_][_NDet_][_NBField_]; //[eta][momentum][detectors]
 
-for (int iD = 0; iD < _NDet_; iD++)
-{
+  for (int iD = 0; iD < _NDet_; iD++)
+  {
 	for (int iA = 0; iA < _NEta_; iA++)
 	{
 	  for (int iP = 0; iP < _NP_; iP++)
@@ -94,42 +100,38 @@ for (int iD = 0; iD < _NDet_; iD++)
 	            //Get Histogram
 	            cout << "Getting: " << HistName << endl;
 	            Htmp = (TH1D*)rootfile->Get(HistName.c_str());
-
-		    if (iA < 3) Htmp->GetXaxis()->SetRangeUser(-0.1, 0.1);
-		    else if(iA ==3) Htmp->GetXaxis()->SetRangeUser(-0.2,0.2);
+		    
+		    
+		    //Tweaking the histograms to attain a good fit (resolutions degrade at high eta, and the binning becomes too fine)
+		    if (TMath::Abs(AngleValues[iA]) < 2.5) Htmp->GetXaxis()->SetRangeUser(-0.1, 0.1);
+		    else if(TMath::Abs(AngleValues[iA]) == 2.5 ) Htmp->GetXaxis()->SetRangeUser(-0.2,0.2);
 		    else
-			{
+		    {
 			Htmp->GetXaxis()->SetRangeUser(-0.3,0.3);
 			Htmp->Rebin(10);
-			}
-	
-                    //Extract Value
-        	    //Htmp = (TH1D*)rootfile->Get(Form("Histograms/Location_%s/%s", Location[LOCATION], HistName));
-	            TF1 *gausFit = new TF1("gausFit", "gaus");
-	            gausFit->SetParameter(1, 0);
-		    if (iA ==0) Htmp->Fit(gausFit, "");
-	            else Htmp->Fit(gausFit, "Q");
-	            double sigma = gausFit->GetParameter(2);
-	            if (sigma == 0) cout << "ERROR! - Bad Value for : " << HistName << endl;
-			Resolution[iA][iP][iD][iB] = sigma*100; //make it a percent
-			if (iA == 0) cout << "Resolution of tracks with transverse momentum " << Momentum[iP] << "-" << Momentum[iP+1] << " and Eta " << Angle[iA] << "-" << Angle[iA+1] << " : " << sigma << endl;
+		    }
+		    
+                        //Extract the value from the histogram and store in array	
+	                TF1 *gausFit = new TF1("gausFit", "gaus");
+	                gausFit->SetParameter(1, 0);
+	                Htmp->Fit(gausFit, "Q");
+	                double sigma = gausFit->GetParameter(2);
+	                if (sigma == 0) cout << "ERROR! - Bad Value for : " << HistName << endl;
+			
+    		        Resolution[iA][iP][iD][iB] = sigma*100; //make it a percent
   		
 			TFile outfile("./Output/Fits.root", "UPDATE");
 			Htmp->Write();
 			outfile.Close();
-		        //Htmp->SetNameTitle( "h_PtFit_P_"+(std::string)Momentum[iP]+"_"+(std::string)Momentum[iP+1]+"_Eta_"+(std::string)Angle[iA]+"_"+(std::string)Angle[iA+1], "(reco_p - truth_p)/truth_p for tracks with pt between "+(std::string)Momentum[iP]+"-"+(std::string)Momentum[iP+1]+" and Eta "+(std::string)Angle[iA]+"-"+(std::string)Angle[iA+1] );
 
-
-	            //Print value to output file for plugging into other code
 	          }//End B Loop
 	    } // End Momentum Loop
 	    
 	} // End Angle Loop
-} // End Detector Loop
+  } // End Detector Loop
 
 
 
-//Need to rewrite this to read the resolution array and plot multiple plots 
 
 
 //setting options
@@ -233,8 +235,8 @@ for (int iD = 0; iD < _NDet_; iD++)
     hdum->GetXaxis()->SetTitleFont(52);
     hdum->GetYaxis()->SetTitleFont(52);
 
-    //hdum->GetXaxis()->SetTitle("p_{T} [GeV]");
-    hdum->GetXaxis()->SetTitle("#eta");
+    hdum->GetXaxis()->SetTitle("p_{T} [GeV]");
+    //hdum->GetXaxis()->SetTitle("#eta");
     hdum->GetXaxis()->SetTitleSize(_TSIZE_);
     hdum->GetXaxis()->SetLabelSize(_LSIZE_);
     hdum->GetYaxis()->SetTitle("p_{T} resolution   #sigma_{p_{T}} /p_{T}  [%]");
