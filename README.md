@@ -7,6 +7,9 @@ In order to make use of the new field map (option 5 in the .C script), you must 
 In order to make use of the GEMs, you must first install the EicToyModel. This can be found here: https://github.com/eic/EicToyModel
 Follow the install instructions there.
 
+First open a shell in the singularity container using:
+>singularity shell -B /cvmfs:/cvmfs -B /direct/eic+u/USERNAME/scratch:/scratch/ /cvmfs/eic.opensciencegrid.org/singularity/rhic_sl7_ext.simg
+
 
 You must also install the MicroMegas simulation: https://github.com/hqh0127/EIC_MMStripCZ
 Install this by going into the source directory, making a build folder, running the autogen.sh script and installing
@@ -32,6 +35,11 @@ Once you have installed the necessary items, each time you open a new singularit
 > export ROOT_INCLUDE_PATH=$HOME/EicToyModel/build/include/etm:${ROOT_INCLUDE_PATH}
 
 > source /cvmfs/eic.opensciencegrid.org/default/opt/fun4all/core/bin/setup_local.sh $HOME/myinstall
+
+
+A couple paths in the Fun4All_G4_HyrbidGem.C macro will need to be updated:
+line ~176 where "EicGeoParData::ImportMediaFile" is found. Edit the path so it points to the EicToyModel you installed
+line ~199 where the "ATHENA" magnetic field map is set. Edit the path so it points to where you have downloaded the the file from https://github.com/eic/BeastMagneticField
 
 Then to test things are working, from the directory with the Fun4All_G4_HybridGem.C script:
 > root
