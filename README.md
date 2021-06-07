@@ -36,6 +36,11 @@ Once you have installed the necessary items, each time you open a new singularit
 
 > source /cvmfs/eic.opensciencegrid.org/default/opt/fun4all/core/bin/setup_local.sh $HOME/myinstall
 
+
+A couple paths in the Fun4All_G4_HyrbidGem.C macro will need to be updated:
+line ~176 where "EicGeoParData::ImportMediaFile" is found. Edit the path so it points to the EicToyModel you installed
+line ~199 where the "ATHENA" magnetic field map is set. Edit the path so it points to where you have downloaded the the file from https://github.com/eic/BeastMagneticField
+
 Then to test things are working, from the directory with the Fun4All_G4_HybridGem.C script:
 > root
 
