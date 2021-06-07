@@ -7,6 +7,9 @@ In order to make use of the new field map (option 5 in the .C script), you must 
 In order to make use of the GEMs, you must first install the EicToyModel. This can be found here: https://github.com/eic/EicToyModel
 Follow the install instructions there.
 
+First open a shell in the singularity container using:
+>singularity shell -B /cvmfs:/cvmfs -B /direct/eic+u/USERNAME/scratch:/scratch/ /cvmfs/eic.opensciencegrid.org/singularity/rhic_sl7_ext.simg
+
 
 You must also install the MicroMegas simulation: https://github.com/hqh0127/EIC_MMStripCZ
 Install this by going into the source directory, making a build folder, running the autogen.sh script and installing
