@@ -79,6 +79,7 @@ R__LOAD_LIBRARY(libPHPythia6.so)
 
 
 #ifdef _GEMS_
+/*
 //Funciton to create gem module with modified material
 auto ModifiedGEM()
 {
@@ -95,10 +96,22 @@ auto ModifiedGEM()
             sbstemp->SetDoubleVariable("mEntranceWindowThickness", 25 * etm::um);
 	    return sbstemp;	
 }
+*/
 //Function to make GEM disk
 void MakeGEM(array<double,6> Params, EicRootGemSubsystem *&fgt)
 {
-	    auto sbs = ModifiedGEM();// creates GEM Module with modified material
+	    //auto sbs = ModifiedGEM();// creates GEM Module with modified material
+	    auto sbs = new GemModule();// creates GEM Module with modified material
+	    sbs->SetDoubleVariable("mDriftFoilCopperThickness", 5 * etm::um);
+	    sbs->SetDoubleVariable("mGemFoilCopperThickness", 5 * etm::um);
+	    sbs->SetDoubleVariable("mGemFoilKaptonThickness", 50 * etm::um);
+	    sbs->SetDoubleVariable("mReadoutSupportThickness", 0 * etm::um);
+	    sbs->SetDoubleVariable("mReadoutKaptonThickness", 50 * etm::um);
+	    sbs->SetDoubleVariable("mFrameThickness", 17 * etm::mm);
+	    sbs->SetDoubleVariable("mFrameBottomEdgeWidth", 30 * etm::mm);
+	    sbs->SetDoubleVariable("mFrameTopEdgeWidth", 50 * etm::mm);
+	    sbs->SetDoubleVariable("mFrameSideEdgeWidth", 15 * etm::mm); 
+            sbs->SetDoubleVariable("mEntranceWindowThickness", 25 * etm::um);
 	    sbs->SetDoubleVariable("mActiveWindowBottomWidth", Params[3] * etm::mm);
 	    sbs->SetDoubleVariable("mActiveWindowTopWidth", Params[2] * etm::mm);
 	    sbs->SetDoubleVariable("mActiveWindowHeight", Params[0] * etm::mm);
@@ -428,9 +441,10 @@ lter acceptance
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt);
 		
-		cout << "Hadron Endcap GEM Dimensions:" << endl;
-		cout << "GEM TOP WIDTH: " << Params[2] << endl;
-		cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
+		//printing dimensions to check for size restriction compliance
+		//cout << "Hadron Endcap GEM Dimensions:" << endl;
+		//cout << "GEM TOP WIDTH: " << Params[2] << endl;
+		//cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
 			
 
 	    //Electron Endcap GEM Disks
@@ -442,9 +456,10 @@ lter acceptance
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
 
-		cout << "Electron Endcap GEM Dimensions:" << endl;
-		cout << "GEM TOP WIDTH: " << Params[2] << endl;
-		cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
+		//printing dimensions to check for size restriction compliance
+		//cout << "Electron Endcap GEM Dimensions:" << endl;
+		//cout << "GEM TOP WIDTH: " << Params[2] << endl;
+		//cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
 
 
 	    //Far Hadron Side GEM disk
@@ -458,6 +473,7 @@ lter acceptance
 	    //Keep radii below 230 (220-230)
 	    //positions 295 and 310	
 
+		//printing dimensions to check for size restriction compliance
 		//cout << "Post-RICH GEM Dimensions:" << endl;
 		//cout << "GEM TOP WIDTH: " << Params[2] << endl;
 		//cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
@@ -465,9 +481,15 @@ lter acceptance
 	   
 	    //Far Electron Side GEM disk
 	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
-	    Params = FullGEMParameters(-1900, 1.05, 110, 12);
+	    //Params = FullGEMParameters(-1900, 1.05, 110, 12); // Width is too long, 9cm shy of radial coverage requirement
+	    Params = FullGEMParameters(-1900, 1.0, 110, 18);
 	    MakeGEM(Params, fgt);
-
+		
+		//printing dimensions to check for size restriction compliance
+//		cout << "Pre-EMCal GEM Dimensions:" << endl;
+//		cout << "GEM TOP WIDTH: " << Params[2] << endl;
+//		cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
+//		cout << "RADIAL COVERAGE: " << Params[0] + 110 << endl;
         
 	  }
 
