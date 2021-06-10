@@ -21,18 +21,23 @@ void wrap_with_cylindrical_blackhole(PHG4Reco *g4Reco,double R,double zmin, doub
 
 	PHG4CylinderSubsystem * cyl_BH;
 
-	cyl_BH = new PHG4CylinderSubsystem("BH_BARR",0);
-	cyl_BH->set_double_param("length"   , zmax - zmin);
+	//generate an id from the parameters
+	double ID = R*zmin*zmax + R + zmin + zmax;
+
+
+	cyl_BH = new PHG4CylinderSubsystem("BH_BARR",ID);
+	cyl_BH->set_double_param("length"   , TMath::Abs(zmax - zmin) );
 	cyl_BH->set_double_param("radius"   , R          );
 	cyl_BH->set_double_param("thickness", thinness   );
 	cyl_BH->set_string_param("material" , "G4_AIR"   );
+	cyl_BH->set_double_param("place_z"  , (zmin+zmax)/2.);
 	cyl_BH->SuperDetector("BH_BARR");
 	cyl_BH->BlackHole();
 	cyl_BH->set_color(0.9,0.5,1,0.5);
 	g4Reco->registerSubsystem(cyl_BH);
 
 	if(endcaps){
-		cyl_BH = new PHG4CylinderSubsystem("BH_FOR",0);
+		cyl_BH = new PHG4CylinderSubsystem("BH_FOR",ID);
 		cyl_BH->set_double_param("length"   , thinness        );
 		cyl_BH->set_double_param("radius"   , hole            );
 		cyl_BH->set_double_param("thickness", R - hole        ); 
@@ -43,7 +48,7 @@ void wrap_with_cylindrical_blackhole(PHG4Reco *g4Reco,double R,double zmin, doub
 		cyl_BH->set_color(0.9,0.5,1,0.5);
 		g4Reco->registerSubsystem(cyl_BH);
 
-		cyl_BH = new PHG4CylinderSubsystem("BH_BACK",0);
+		cyl_BH = new PHG4CylinderSubsystem("BH_BACK",ID);
 		cyl_BH->set_double_param("length"   , thinness        );
 		cyl_BH->set_double_param("radius"   , hole            );
 		cyl_BH->set_double_param("thickness", R - hole        );
