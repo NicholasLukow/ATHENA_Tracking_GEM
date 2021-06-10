@@ -149,11 +149,10 @@ void Fun4All_G4_HybridGEM(
   gSystem->Load("libg4example01detector.so");
   gSystem->Load("libg4trackfastsim.so");
 	// Input from the user
-	const int particle_gen = 5;     // 1 = particle generator, 2 = particle gun, 3 = simple event generator, 4 = pythia8 e+p collision, 5 = particle generator flat in pT
+	const int particle_gen = 1;     // 1 = particle generator, 2 = particle gun, 3 = simple event generator, 4 = pythia8 e+p collision, 5 = particle generator flat in pT
 	double pix_size_vtx = 10.; // um - size of pixels in vertexing layers
 	double pix_size_bar = 10.; // um - size of pixels in barrel layers
 	double pix_size_dis = 10.; // um - size of pixels in disk layers
-	bool use_blackhole = false;
 	const int nDisks_per_side = 5;
 	// ======================================================================================================
 	// Make the Server
@@ -278,15 +277,35 @@ void Fun4All_G4_HybridGEM(
 		g4Reco->registerSubsystem(cyl);
 	}
 	#endif
-/*
+
 	//---------------------------
 	// Black hole to suck loopers out of their misery
-	double BH_r = si_r_pos[nTrckLayers-1]+2;
-	double BH_zmin = si_z_pos[0]-2;
-	double BH_zmax = si_z_pos[sizeof(si_z_pos)/sizeof(*si_z_pos)-1]+2;
-	if(use_blackhole)
-		wrap_with_cylindrical_blackhole(g4Reco,BH_r,BH_zmin,BH_zmax);
-*/
+	#ifdef _BLACKHOLE_
+	double BH_r = 100;
+	double BH_zmin = -1;
+	double BH_zmax = 200;
+	//wrap_with_cylindrical_blackhole(g4Reco,BH_r,BH_zmin,BH_zmax);
+	//wrap_with_cylindrical_blackhole(g4Reco,BH_r,BH_zmin,BH_zmax,false);
+	
+	//Black Hole Around BMT
+	//wrap_with_cylindrical_blackhole(g4Reco,90,-90,90,false);
+	
+	//Black Hole Around Endcap GEM
+	//wrap_with_cylindrical_blackhole(g4Reco,115,-140,140,false);
+
+	//Black Hole around Far Back GEM
+	//wrap_with_cylindrical_blackhole(g4Reco,170,-200,0,false);
+	//wrap_with_cylindrical_blackhole(g4Reco,170,-200,-199,true);
+	
+	//Black Hole around Far Forward GEM
+	//wrap_with_cylindrical_blackhole(g4Reco,250,0,320,false);
+	//wrap_with_cylindrical_blackhole(g4Reco,250,320,321,true);
+	
+	//Full Wrap single Cylinder
+	wrap_with_cylindrical_blackhole(g4Reco,250,-199,321,true);
+
+	#endif
+	
 	#ifdef _BEAMPIPE_
 	//---------------------------
 	// mid-rapidity beryllium pipe
@@ -369,6 +388,7 @@ lter acceptance
 	    77.4653
 	  };
 
+
         PHG4CylinderStripSubsystem *example01;
         const double prapidity =1;
         double bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*80;
@@ -399,41 +419,24 @@ lter acceptance
                                                                                                                                                       
         auto fgt = new EicRootGemSubsystem("FGT");
         {
-          fgt->SetActive(true);
-          //fgt->CheckOverlap();                                                                                                                     \
+	 	 fgt->SetActive(true);
+         	{
+	 //fgt->CheckOverlap();                                                                                                                     \
                                                                                                                                                       
           //fgt->SetTGeoGeometryCheckPrecision(0.000001 * etm::um);                                                                                  \
                                                                              
-                    {
             // See other GemModule class data in GemGeoParData.h;                                                                                    \
             // Compose sectors; parameters are:                                                                                                      \
-                                                                                                                                                      
             //   - layer description (obviously can mix different geometries);                                                                       \
-                                                                                                                                                      
             //   - azimuthal segmentation;                                                                                                            
             //   - gas volume center radius;                                                                                                         \
-                                                                                                                                                      
             //   - Z offset from 0.0 (default);                                                                                                      \
-                                                                                                                                                      
             //   - azimuthal rotation from 0.0 (default);                                                                                            \
-	   
-/*
-	    sbs->SetDoubleVariable("mDriftFoilCopperThickness", 5 * etm::um);
-	    sbs->SetDoubleVariable("mGemFoilCopperThickness", 5 * etm::um);
-	    sbs->SetDoubleVariable("mGemFoilKaptonThickness", 50 * etm::um);
-	    sbs->SetDoubleVariable("mReadoutSupportThickness", 0 * etm::um);
-	    sbs->SetDoubleVariable("mReadoutKaptonThickness", 50 * etm::um);
-	    sbs->SetDoubleVariable("mFrameThickness", 17 * etm::mm);
-	    sbs->SetDoubleVariable("mFrameBottomEdgeWidth", 30 * etm::mm);
-	    sbs->SetDoubleVariable("mFrameTopEdgeWidth", 50 * etm::mm);
-	    sbs->SetDoubleVariable("mFrameSideEdgeWidth", 15 * etm::mm);                                                                                                                      sbs->SetDoubleVariable("mEntranceWindowThickness", 25 * etm::um);
-*/	    
-
+		
 		//FullGEMParameters() will calculate the parameters to define the geometry of the GEM disk based on the Z location, minimum eta coverage, inner radius clearance, and number of modules
 	        //Array definition: Params[] = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
 	    
 	    //Hadron Endcap GEM Disks
-	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
 	    array<double,6> Params = FullGEMParameters(1300, 1.05, 140, 12);
 	    MakeGEM(Params, fgt);
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
@@ -441,14 +444,7 @@ lter acceptance
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt);
 		
-		//printing dimensions to check for size restriction compliance
-		//cout << "Hadron Endcap GEM Dimensions:" << endl;
-		//cout << "GEM TOP WIDTH: " << Params[2] << endl;
-		//cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
-			
-
 	    //Electron Endcap GEM Disks
-	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
 	    Params = FullGEMParameters(-1300, 1.05, 100, 12);
 	    MakeGEM(Params, fgt);
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
@@ -456,45 +452,20 @@ lter acceptance
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
 
-		//printing dimensions to check for size restriction compliance
-		//cout << "Electron Endcap GEM Dimensions:" << endl;
-		//cout << "GEM TOP WIDTH: " << Params[2] << endl;
-		//cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
-
-
 	    //Far Hadron Side GEM disk
-	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
 	    Params = FullGEMParameters(2950, 1.05, 210, 12);
 	    MakeGEM(Params, fgt);
 	    Params[4]=Params[4]+150; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
-
-	    //This will be a GEM-TRD, so the width requirement of 55cm can be safely ignored for now
-	    //Keep radii below 230 (220-230)
-	    //positions 295 and 310	
-
-		//printing dimensions to check for size restriction compliance
-		//cout << "Post-RICH GEM Dimensions:" << endl;
-		//cout << "GEM TOP WIDTH: " << Params[2] << endl;
-		//cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
-            
 	   
 	    //Far Electron Side GEM disk
-	    // FullGEMParameters( Z, EtaMin, InnerRadius, NModules)
-	    //Params = FullGEMParameters(-1900, 1.05, 110, 12); // Width is too long, 9cm shy of radial coverage requirement
 	    Params = FullGEMParameters(-1900, 1.0, 110, 18);
 	    MakeGEM(Params, fgt);
 		
-		//printing dimensions to check for size restriction compliance
-//		cout << "Pre-EMCal GEM Dimensions:" << endl;
-//		cout << "GEM TOP WIDTH: " << Params[2] << endl;
-//		cout << "GEM ACTIVE LENGTH: " << Params[0] << endl;
-//		cout << "RADIAL COVERAGE: " << Params[0] + 110 << endl;
         
-	  }
-
+	}
           g4Reco->registerSubsystem(fgt);
-        }
+}
 #endif
 
   // Detailed vertex Si tracker from EicToyModel
