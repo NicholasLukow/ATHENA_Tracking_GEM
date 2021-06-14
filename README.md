@@ -48,8 +48,24 @@ Then to test things are working, from the directory with the Fun4All_G4_HybridGe
 
 > root[] .L DisplayOn.C
 
-> root[] PHG4Reco *g4 = QTGui();
+> root[] PHG4Reco \*g4 = QTGui();
 
 And you should see the visualization of the detector setup with a cutaway.
 
 To add or remove parts of the detector, open the detector_setup.h file and comment out the corresponding definition.
+
+There are two scripts to allow for job submission:
+
+SimuCondor.sh:
+	-requires a one-time change: update the "source" lines to point to your installation
+
+submit_condor.csh:
+	-change the OUTPUT_DIR to your working directory where you have the Fun4All_G4_HybridGEM.C script and the other .C scripts
+	-LIMIT and EVENTS are used to set the number of jobs and number of events per job
+	-NAME is the name you wish to give the output .root files (the job number will be appended to this)
+	-the rest are self explanatory inputs to the simulation
+
+If you wish to submit jobs, you do not need to open a singularity shell and perform the source commands as written (this is taken care of inside the job).
+Just set the parameters, edit the Fun4All_G4_HybridGEM.C and detector_setup.h scripts for the detector configuration you want, and the submit the jobs via:
+
+> csh submit_condor.csh
