@@ -80,24 +80,6 @@ R__LOAD_LIBRARY(libPHPythia6.so)
 
 
 #ifdef _GEMS_
-/*
-//Funciton to create gem module with modified material
-auto ModifiedGEM()
-{
-	    auto sbstemp = new GemModule();
-	    sbstemp->SetDoubleVariable("mDriftFoilCopperThickness", 5 * etm::um);
-	    sbstemp->SetDoubleVariable("mGemFoilCopperThickness", 5 * etm::um);
-	    sbstemp->SetDoubleVariable("mGemFoilKaptonThickness", 50 * etm::um);
-	    sbstemp->SetDoubleVariable("mReadoutSupportThickness", 0 * etm::um);
-	    sbstemp->SetDoubleVariable("mReadoutKaptonThickness", 50 * etm::um);
-	    sbstemp->SetDoubleVariable("mFrameThickness", 17 * etm::mm);
-	    sbstemp->SetDoubleVariable("mFrameBottomEdgeWidth", 30 * etm::mm);
-	    sbstemp->SetDoubleVariable("mFrameTopEdgeWidth", 50 * etm::mm);
-	    sbstemp->SetDoubleVariable("mFrameSideEdgeWidth", 15 * etm::mm); 
-            sbstemp->SetDoubleVariable("mEntranceWindowThickness", 25 * etm::um);
-	    return sbstemp;	
-}
-*/
 //Function to make GEM disk
 void MakeGEM(array<double,6> Params, EicRootGemSubsystem *&fgt)
 {
@@ -225,7 +207,104 @@ void Fun4All_G4_HybridGEM(
 	// ======================================================================================================
 	// Detector setup
 	PHG4CylinderSubsystem *cyl;
+	
+	#ifdef _SIVTX_
 	//---------------------------
+	// Vertexing
+	double si_vtx_r_pos[] = {3.30,5.70};
+	const int nVtxLayers = sizeof(si_vtx_r_pos)/sizeof(*si_vtx_r_pos);
+	double si_z_vtxlength[] = {30.,30.};
+	//double si_thick_vtx = vtx_matBud/100.*9.37;
+	double si_thick_vtx = 0.05/100.*9.37;
+
+	for (int ilayer = 0; ilayer < nVtxLayers ; ilayer++){
+		cyl = new PHG4CylinderSubsystem("SVTX", ilayer);
+		cyl->set_string_param("material" , "G4_Si"               );
+		cyl->set_double_param("radius"   , si_vtx_r_pos[ilayer]  );
+		cyl->set_double_param("thickness", si_thick_vtx          );
+		cyl->set_double_param("place_z"  , 0                     );
+		cyl->set_double_param("length"   , si_z_vtxlength[ilayer]);
+		cyl->SetActive();
+		cyl->SuperDetector("SVTX");
+		cyl->set_color(0,0.8,0.1);
+		g4Reco->registerSubsystem(cyl);
+	}
+	#endif
+
+	#ifdef _SIBARR_
+	//---------------------------
+	// Barrel
+	double si_r_pos[] = {21.,22.68,39.3,43.23};
+	const int nTrckLayers = sizeof(si_r_pos)/sizeof(*si_r_pos);
+	double si_z_length[] = {54.,60.,105.,114.};
+	//double si_thick_bar = barr_matBud/100.*9.37;
+	double si_thick_bar = 0.55/100.*9.37;
+
+	for (int ilayer = 0; ilayer < nTrckLayers ; ilayer++){
+		cyl = new PHG4CylinderSubsystem("BARR", ilayer);
+		cyl->set_string_param("material" , "G4_Si"            );
+		cyl->set_double_param("radius"   , si_r_pos[ilayer]   );
+		cyl->set_double_param("thickness", si_thick_bar       );
+		cyl->set_double_param("place_z"  , 0                  );
+		cyl->set_double_param("length"   , si_z_length[ilayer]);
+		cyl->SetActive();
+		cyl->SuperDetector("BARR");
+		cyl->set_color(0,0.5,1);
+		g4Reco->registerSubsystem(cyl);	
+	}
+	#endif
+
+	#ifdef _SIDISKS_
+	//---------------------------
+	// Disks
+	double si_z_pos[] = {-121.,-97.,-73.,-49.,-25.,25.,49.,73.,97.,121.};
+	const int nDisks = 10;
+	//const double z_min_d = 25.; // cm (z of the first disk)
+	//const double z_max_d = 121.; // cm (z of the last disk)
+	//const double disk_to_disk_distance = (z_max_d-z_min_d)/((float)nDisks_per_side-1.);
+	//const int nDisks = nDisks_per_side*2;
+	//double si_z_pos[nDisks] = {0};
+	double si_r_max[nDisks] = {0};
+	double si_r_min[nDisks] = {0};
+	//double si_thick_disk = disk_matBud/100.*9.37;
+	double si_thick_disk = 0.25/100.*9.37;
+	
+	//for(int i = 0        ; i < nDisks_per_side   ; i++) si_z_pos[i] = -z_max_d + (float)i*disk_to_disk_distance;	
+	//for(int i = nDisks-1 ; i > nDisks_per_side-1 ; i--) si_z_pos[i] = z_min_d + (float)(i-nDisks_per_side)*disk_to_disk_distance;
+
+	for(int i = 0 ; i < nDisks ; i++){
+		si_r_max[i] = TMath::Min(43.23,18.5*abs(si_z_pos[i])/si_z_pos[nDisks_per_side]);
+
+		if(si_z_pos[i]>66.8&&si_z_pos[i]>0) si_r_min[i] = (0.05025461*si_z_pos[i]-0.180808);
+		else if(si_z_pos[i]>0) si_r_min[i] = 3.18;
+		else if(si_z_pos[i]<-79.8&&si_z_pos[i]<0) si_r_min[i] = (-0.0297039*si_z_pos[i]+0.8058281);
+		else si_r_min[i] = 3.18;
+
+		si_r_max[i] -= si_r_min[i];
+
+		cout << "Rmin, Rmax: " << si_r_min[i] << " " << si_r_max[i] << endl;
+	}
+
+	for (int ilayer = 0; ilayer < nDisks ; ilayer++){
+		cyl = new PHG4CylinderSubsystem("FBVS", ilayer);
+		cyl->set_string_param("material" , "G4_Si"         );
+		cyl->set_double_param("radius"   , si_r_min[ilayer]);
+		cyl->set_double_param("thickness", si_r_max[ilayer]);
+		cyl->set_double_param("place_z"  , si_z_pos[ilayer]);
+		cyl->set_double_param("length"   , si_thick_disk   );
+		cyl->SetActive();
+		cyl->SuperDetector("FBST");
+		cyl->set_color(1,0,0);
+		g4Reco->registerSubsystem(cyl);
+	}
+	#endif
+		
+	#ifdef _ALSUPP_
+	// Al Support Structure
+	AllSi_Al_support_Subsystem *Al_supp = new AllSi_Al_support_Subsystem("Al_supp");
+	g4Reco->registerSubsystem(Al_supp);	
+	#endif
+	// ------------	
 
 	#ifdef _SIMPLEVST_
 	//---------------------------
@@ -249,89 +328,12 @@ void Fun4All_G4_HybridGEM(
 		g4Reco->registerSubsystem(cyl);	
 	}
 	#endif	
-
-	//Silicon Barrel and vertex layers using values from Table 11.12 in the Yellow Report
-	#ifdef _SIBARR_
-	//---------------------------
-	// Barrel
-
-	double si_r_pos[] = {3.64, 4.45, 5.26, 13.38, 18.0};
-	//double si_r_pos[] = {3.64, 5.26, 13.38, 18.0};
-	const int nTrckLayers = sizeof(si_r_pos)/sizeof(*si_r_pos);
-	double si_z_length[] = {42.0, 42.0, 42.0, 84.0, 84.0};
-	//double si_z_length[] = {27.0, 27.0, 27.0, 54.0, 54.0};
-	//double si_z_length[] = {42.0, 42.0, 84.0, 84.0};
-	//double si_z_length[] = {27.0, 27.0, 54.0, 54.0};
-	//double si_thick_bar = barr_matBud/100.*9.37;
-	double si_thick_bar = 0.55/100.*9.37;
-
-	for (int ilayer = 0; ilayer < nTrckLayers ; ilayer++){
-		cyl = new PHG4CylinderSubsystem("BARR", ilayer);
-		cyl->set_string_param("material" , "G4_Si"            );
-		cyl->set_double_param("radius"   , si_r_pos[ilayer]   );
-		cyl->set_double_param("thickness", si_thick_bar       );
-		cyl->set_double_param("place_z"  , 0                  );
-		cyl->set_double_param("length"   , si_z_length[ilayer]);
-		cyl->SetActive();
-		cyl->SuperDetector("BARR");
-		cyl->set_color(0,0.5,1);
-		g4Reco->registerSubsystem(cyl);	
-	}
-	#endif	
-
-
-	//Silicon Disks using values from Table 11.12 in the Yellow Report
-	#ifdef _SIDISKS_
-	//---------------------------
-	// Disks
-
-	double si_z_pos[] = {-121.,-105.4,-89.8,-74.2,-58.6,-43.0,-22.0,22.0,43.0,58.6,74.2,89.8,105.4, 121.};
-	const int nDisks = sizeof(si_z_pos)/sizeof(*si_z_pos);
-	double si_r_max[] = {19.0, 19.0, 19.0, 19.0, 19.0, 13.94, 7.13, 7.13, 13.94, 19.0, 19.0, 19.0, 19.0, 19.0};
-	double si_r_min[] = {9.93, 8.35, 6.67, 4.99, 3.64, 3.64, 3.64, 3.64, 3.64, 3.64, 4.99, 6.67, 8.35, 9.93};
-/*	
-	double si_z_pos[] = {-121., -96.25, -71.5, -46.75, -22.0, 22.0, 46.75, 71.5, 96.25, 121.};
-	const int nDisks = sizeof(si_z_pos)/sizeof(*si_z_pos);
-	double si_r_max[] = {19.0, 19.0, 19.0, 19.0, 7.13, 7.13, 19.0, 19.0, 19.0, 19.0};
-	double si_r_min[] = {9.93, 7.25, 4.65, 3.64, 3.64, 3.64, 3.64, 4.65, 7.25, 9.93};
-*/	
-	double si_thick_disk = 0.25/100.*9.37;
 	
-	for (int ilayer = 0; ilayer < nDisks ; ilayer++){
-		cyl = new PHG4CylinderSubsystem("FBVS", ilayer);
-		cyl->set_string_param("material" , "G4_Si"         );
-		cyl->set_double_param("radius"   , si_r_min[ilayer]);
-		cyl->set_double_param("thickness", si_r_max[ilayer]-si_r_min[ilayer]);
-		cyl->set_double_param("place_z"  , si_z_pos[ilayer]);
-		cyl->set_double_param("length"   , si_thick_disk   );
-		cyl->SetActive();
-		cyl->SuperDetector("FBST");
-		cyl->set_color(1,0,0);
-		g4Reco->registerSubsystem(cyl);
-	}
-	#endif
-
 	//---------------------------
 	// Black hole to suck loopers out of their misery
 	#ifdef _BLACKHOLE_
-	
-	//Black Hole Around BMT
-	//wrap_with_cylindrical_blackhole(g4Reco,90,-90,90,false);
-	
-	//Black Hole Around Endcap GEM
-	//wrap_with_cylindrical_blackhole(g4Reco,115,-140,140,false);
-
-	//Black Hole around Far Back GEM
-	//wrap_with_cylindrical_blackhole(g4Reco,170,-200,0,false);
-	//wrap_with_cylindrical_blackhole(g4Reco,170,-200,-199,true);
-	
-	//Black Hole around Far Forward GEM
-	//wrap_with_cylindrical_blackhole(g4Reco,250,0,320,false);
-	//wrap_with_cylindrical_blackhole(g4Reco,250,320,321,true);
-	
 	//Full Wrap single Cylinder
-	wrap_with_cylindrical_blackhole(g4Reco,250,-199,321,true);
-
+	wrap_with_cylindrical_blackhole(g4Reco,260,-199,321,true);
 	#endif
 
 	#ifdef _RICH_
@@ -377,6 +379,7 @@ void Fun4All_G4_HybridGEM(
 	cyl->set_double_param("thickness", au_layer_thickness);
 	cyl->SuperDetector("PIPE");
 	g4Reco->registerSubsystem(cyl);
+
 	//---------------------------
        #endif 
 
@@ -413,12 +416,6 @@ lter acceptance
         }
 	#endif
 	// ------------
-	#ifdef _ALSUPP_
-	// Al Support Structure
-	AllSi_Al_support_Subsystem *Al_supp = new AllSi_Al_support_Subsystem("Al_supp");
-	g4Reco->registerSubsystem(Al_supp);	
-	#endif
-	// ------------	
         #ifdef _MPGD_
         double gap_betweenCZ = 1.5, Gap_betweenlayer = 1.5;
         //double thickness = 0.355199;                                                                                                                
@@ -431,21 +428,15 @@ lter acceptance
         }
   //double BMT_r[6] = {20., 20.+nCZlayer*thicknessMPGD+gap_betweenCZ+Gap_betweenlayer, 50-nCZlayer*thicknessMPGD-gap_betweenCZ-Gap_betweenlayer/2, 50\
 +Gap_betweenlayer/2, 80-(nCZlayer*thicknessMPGD+gap_betweenCZ)*2-Gap_betweenlayer, 80-nCZlayer*thicknessMPGD-gap_betweenCZ};                          
-  	double BMT_r[6] = {
-	    47.7153,
-	    49.5718,
-	    71.8958,
-	    73.7523,
-	    75.6088,
-	    77.4653
-	  };
+  	//double BMT_r[6] = {    47.7153, 49.5718, 71.8958, 73.7523, 75.6088, 77.4653  };
+  	double BMT_r[4] = {   71.8958, 73.7523, 75.6088, 77.4653  };
 
 
         PHG4CylinderStripSubsystem *example01;
-        const double prapidity =1;
+        const double prapidity =1.0;
         double bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*80;
         //double bmt_length = 250;
-        for (int ilayer = 0; ilayer< 6; ilayer++){
+        for (int ilayer = 0; ilayer< 4; ilayer++){
                 example01 = new PHG4CylinderStripSubsystem("BMT",ilayer);
                 example01->set_double_param("radius", BMT_r[ilayer]);
                 example01->set_string_param("gas", "myMMGas");
@@ -491,8 +482,9 @@ lter acceptance
 
 	    
 	    //Hadron Endcap GEM Disks
-	    //array<double,6> Params = FullGEMParameters(1082.5, 1.05, 270, 12);
-	    array<double,6> Params = FullGEMParameters(1300, 1.05, 140, 12);
+	    array<double,6> Params = FullGEMParameters(1082.5, 0.95, 500, 12); //increased inner radius to account for Berkley Si Disks
+	    //array<double,6> Params = FullGEMParameters(1082.5, 0.95, 270, 12);
+	    //array<double,6> Params = FullGEMParameters(1300, 1.05, 140, 12);
 	    MakeGEM(Params, fgt);
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt);
@@ -500,18 +492,23 @@ lter acceptance
 	    MakeGEM(Params, fgt);
 		
 	    //Electron Endcap GEM Disks
-	    //Params = FullGEMParameters(-1082.5, 1.05, 270, 12);
-	    Params = FullGEMParameters(-1300, 1.05, 100, 12);
+	    Params = FullGEMParameters(-1082.5, 0.95, 500, 12); //increased inner radius to account for Berkley Si Disks
+	    //Params = FullGEMParameters(-1082.5, 0.95, 270, 12);
+	    //Params = FullGEMParameters(-1300, 1.05, 100, 12);
 	    MakeGEM(Params, fgt);
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
 
+	    //cout << "Endcap Parameters:" << endl;
+	    //cout << "Top Width: " << Params[2] << endl;
+	    //cout << "Active Length: " << Params[0] << endl;
+
 	    //Far Hadron Side GEM disk
-	    Params = FullGEMParameters(3010, 1.05, 210, 12);
+	    Params = FullGEMParameters(3050, 1.05, 210, 12);
 	    MakeGEM(Params, fgt);
-	    Params[4]=Params[4]+90; //Copying previous parameters but shifting in Z
+	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
 	   
 	    //Far Electron Side GEM disk
