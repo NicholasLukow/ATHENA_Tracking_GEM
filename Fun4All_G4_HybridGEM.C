@@ -4,7 +4,7 @@
 ================================================================================================================
 */
 #pragma once
-#include "detector_setup.h"
+#include "/eic/u/lukown/Simulations/WorkingDirectory/detector_setup.h"
 #include <phgenfit/Track.h>
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -30,6 +30,7 @@
 #include <phool/recoConsts.h>
 #include <g4lblvtx/PHG4ParticleGenerator_flat_pT.h>
 #include <g4lblvtx/AllSi_Al_support_Subsystem.h>
+#include <g4lblvtx/EicFRichSubsystem.h>
 #include "G4_BlackHole.C"
 
 #ifdef _EICTOYVST_
@@ -139,7 +140,7 @@ void Fun4All_G4_HybridGEM(
 			double etamin = -3.5,
 			double etamax = 3.5,
 			int magnetic_field = 5, 		// Magnetic field setting
-			TString out_name = "out_TrackingStudy")	// output filename
+			TString out_name = "TEST")	// output filename
 {	
 	// ======================================================================================================
   gSystem->Load("libfun4all");
@@ -185,7 +186,7 @@ void Fun4All_G4_HybridGEM(
 	// ======================================================================================================
 	PHG4Reco *g4Reco = new PHG4Reco();
 	//g4Reco->SetWorldMaterial("G4_Galactic");	
-        EicGeoParData::ImportMediaFile("/scratch/EicToyModel/examples/eicroot/media.geo");
+        EicGeoParData::ImportMediaFile("/eic/u/lukown/EicToyModel/examples/eicroot/media.geo");
 	// ======================================================================================================
 	// Magnetic field setting
 	TString B_label;
@@ -226,16 +227,41 @@ void Fun4All_G4_HybridGEM(
 	PHG4CylinderSubsystem *cyl;
 	//---------------------------
 
+	#ifdef _SIMPLEVST_
+	//---------------------------
+	// Barrel
+
+	double si_r_pos[] = { 7.0, 14.0,  21, 28.0}; //Simplified Toy Model
+	const int nTrckLayers = sizeof(si_r_pos)/sizeof(*si_r_pos);
+	double si_z_length[] = {27.0, 27.0, 54.0, 54.0}; //Simplified Toy Model
+	double si_thick_bar = 0.55/100.*9.37;
+
+	for (int ilayer = 0; ilayer < nTrckLayers ; ilayer++){
+		cyl = new PHG4CylinderSubsystem("BARR", ilayer);
+		cyl->set_string_param("material" , "G4_Si"            );
+		cyl->set_double_param("radius"   , si_r_pos[ilayer]   );
+		cyl->set_double_param("thickness", si_thick_bar       );
+		cyl->set_double_param("place_z"  , 0                  );
+		cyl->set_double_param("length"   , si_z_length[ilayer]);
+		cyl->SetActive();
+		cyl->SuperDetector("SIMPLEVST");
+		cyl->set_color(0,0.5,1);
+		g4Reco->registerSubsystem(cyl);	
+	}
+	#endif	
+
 	//Silicon Barrel and vertex layers using values from Table 11.12 in the Yellow Report
 	#ifdef _SIBARR_
 	//---------------------------
 	// Barrel
 
-	//double si_r_pos[] = {21.,22.68,39.3,43.23};
 	double si_r_pos[] = {3.64, 4.45, 5.26, 13.38, 18.0};
+	//double si_r_pos[] = {3.64, 5.26, 13.38, 18.0};
 	const int nTrckLayers = sizeof(si_r_pos)/sizeof(*si_r_pos);
-	//double si_z_length[] = {54.,60.,105.,114.};
 	double si_z_length[] = {42.0, 42.0, 42.0, 84.0, 84.0};
+	//double si_z_length[] = {27.0, 27.0, 27.0, 54.0, 54.0};
+	//double si_z_length[] = {42.0, 42.0, 84.0, 84.0};
+	//double si_z_length[] = {27.0, 27.0, 54.0, 54.0};
 	//double si_thick_bar = barr_matBud/100.*9.37;
 	double si_thick_bar = 0.55/100.*9.37;
 
@@ -258,17 +284,24 @@ void Fun4All_G4_HybridGEM(
 	#ifdef _SIDISKS_
 	//---------------------------
 	// Disks
+
 	double si_z_pos[] = {-121.,-105.4,-89.8,-74.2,-58.6,-43.0,-22.0,22.0,43.0,58.6,74.2,89.8,105.4, 121.};
 	const int nDisks = sizeof(si_z_pos)/sizeof(*si_z_pos);
 	double si_r_max[] = {19.0, 19.0, 19.0, 19.0, 19.0, 13.94, 7.13, 7.13, 13.94, 19.0, 19.0, 19.0, 19.0, 19.0};
 	double si_r_min[] = {9.93, 8.35, 6.67, 4.99, 3.64, 3.64, 3.64, 3.64, 3.64, 3.64, 4.99, 6.67, 8.35, 9.93};
+/*	
+	double si_z_pos[] = {-121., -96.25, -71.5, -46.75, -22.0, 22.0, 46.75, 71.5, 96.25, 121.};
+	const int nDisks = sizeof(si_z_pos)/sizeof(*si_z_pos);
+	double si_r_max[] = {19.0, 19.0, 19.0, 19.0, 7.13, 7.13, 19.0, 19.0, 19.0, 19.0};
+	double si_r_min[] = {9.93, 7.25, 4.65, 3.64, 3.64, 3.64, 3.64, 4.65, 7.25, 9.93};
+*/	
 	double si_thick_disk = 0.25/100.*9.37;
 	
 	for (int ilayer = 0; ilayer < nDisks ; ilayer++){
 		cyl = new PHG4CylinderSubsystem("FBVS", ilayer);
 		cyl->set_string_param("material" , "G4_Si"         );
 		cyl->set_double_param("radius"   , si_r_min[ilayer]);
-		cyl->set_double_param("thickness", si_r_max[ilayer]);
+		cyl->set_double_param("thickness", si_r_max[ilayer]-si_r_min[ilayer]);
 		cyl->set_double_param("place_z"  , si_z_pos[ilayer]);
 		cyl->set_double_param("length"   , si_thick_disk   );
 		cyl->SetActive();
@@ -281,11 +314,6 @@ void Fun4All_G4_HybridGEM(
 	//---------------------------
 	// Black hole to suck loopers out of their misery
 	#ifdef _BLACKHOLE_
-	double BH_r = 100;
-	double BH_zmin = -1;
-	double BH_zmax = 200;
-	//wrap_with_cylindrical_blackhole(g4Reco,BH_r,BH_zmin,BH_zmax);
-	//wrap_with_cylindrical_blackhole(g4Reco,BH_r,BH_zmin,BH_zmax,false);
 	
 	//Black Hole Around BMT
 	//wrap_with_cylindrical_blackhole(g4Reco,90,-90,90,false);
@@ -305,6 +333,14 @@ void Fun4All_G4_HybridGEM(
 	wrap_with_cylindrical_blackhole(g4Reco,250,-199,321,true);
 
 	#endif
+
+	#ifdef _RICH_
+
+	EicFRichSubsystem *RICH = new EicFRichSubsystem("RICH");
+	g4Reco->registerSubsystem(RICH);
+	
+	#endif
+
 	
 	#ifdef _BEAMPIPE_
 	//---------------------------
@@ -316,6 +352,12 @@ void Fun4All_G4_HybridGEM(
 	double be_pipe_length = be_pipe_length_plus - be_pipe_length_neg;
 	double be_pipe_center = 0.5 * (be_pipe_length_plus + be_pipe_length_neg);
 
+	double au_layer_radius = be_pipe_thickness+be_pipe_radius;
+	double au_layer_thickness = 0.0010; //10 um
+	double au_layer_length = be_pipe_length;
+	double au_layer_center = be_pipe_center;
+
+
 	cyl = new PHG4CylinderSubsystem("BE_PIPE", 1);
 	cyl->set_double_param("radius", be_pipe_radius);
 	cyl->set_int_param("lengthviarapidity", 0);
@@ -323,6 +365,16 @@ void Fun4All_G4_HybridGEM(
 	cyl->set_double_param("place_z", be_pipe_center);
 	cyl->set_string_param("material", "G4_Be");
 	cyl->set_double_param("thickness", be_pipe_thickness);
+	cyl->SuperDetector("PIPE");
+	g4Reco->registerSubsystem(cyl);
+	
+	cyl = new PHG4CylinderSubsystem("BE_PIPE", 2);
+	cyl->set_double_param("radius", au_layer_radius);
+	cyl->set_int_param("lengthviarapidity", 0);
+	cyl->set_double_param("length", au_layer_length);
+	cyl->set_double_param("place_z", au_layer_center);
+	cyl->set_string_param("material", "G4_Au");
+	cyl->set_double_param("thickness", au_layer_thickness);
 	cyl->SuperDetector("PIPE");
 	g4Reco->registerSubsystem(cyl);
 	//---------------------------
@@ -435,8 +487,11 @@ lter acceptance
 		
 		//FullGEMParameters() will calculate the parameters to define the geometry of the GEM disk based on the Z location, minimum eta coverage, inner radius clearance, and number of modules
 	        //Array definition: Params[] = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
+
+
 	    
 	    //Hadron Endcap GEM Disks
+	    //array<double,6> Params = FullGEMParameters(1082.5, 1.05, 270, 12);
 	    array<double,6> Params = FullGEMParameters(1300, 1.05, 140, 12);
 	    MakeGEM(Params, fgt);
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
@@ -445,6 +500,7 @@ lter acceptance
 	    MakeGEM(Params, fgt);
 		
 	    //Electron Endcap GEM Disks
+	    //Params = FullGEMParameters(-1082.5, 1.05, 270, 12);
 	    Params = FullGEMParameters(-1300, 1.05, 100, 12);
 	    MakeGEM(Params, fgt);
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
@@ -453,9 +509,9 @@ lter acceptance
 	    MakeGEM(Params, fgt); 
 
 	    //Far Hadron Side GEM disk
-	    Params = FullGEMParameters(2950, 1.05, 210, 12);
+	    Params = FullGEMParameters(3010, 1.05, 210, 12);
 	    MakeGEM(Params, fgt);
-	    Params[4]=Params[4]+150; //Copying previous parameters but shifting in Z
+	    Params[4]=Params[4]+90; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
 	   
 	    //Far Electron Side GEM disk
@@ -554,6 +610,19 @@ lter acceptance
 			0                               	// noise hits
 			);
 	#endif
+	
+	#ifdef _SIMPLEVST_
+	// add Barrel Layers
+	kalman->add_phg4hits(
+			"G4HIT_SIMPLEVST",                   	// const std::string& phg4hitsNames,
+			PHG4TrackFastSim::Cylinder,
+			999.,                           	// radial-resolution [cm]
+			pix_size_bar/10000./sqrt(12.),      	// azimuthal-resolution [cm]
+			pix_size_bar/10000./sqrt(12.),      	// z-resolution [cm]
+			1,                              	// efficiency,
+			0                               	// noise hits
+			);
+	#endif
 
 	#ifdef _SIDISKS_
 	//  add Disk Layers
@@ -642,7 +711,7 @@ lter acceptance
 
 	se->registerSubsystem(kalman);
 
-	std::string outputFile = "./Output/"+(std::string)(out_name)+std::string(B_label)+"_FastSimEval.root";
+	std::string outputFile = "./Output/TEMP/"+(std::string)(out_name)+std::string(B_label)+"_FastSimEval.root";
 
 	PHG4TrackFastSimEval *fast_sim_eval = new PHG4TrackFastSimEval("FastTrackingEval");
 	fast_sim_eval->set_filename(outputFile);
