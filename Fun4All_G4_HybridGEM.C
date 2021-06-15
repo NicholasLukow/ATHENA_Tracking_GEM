@@ -94,7 +94,7 @@ void MakeGEM(array<double,6> Params, EicRootGemSubsystem *&fgt)
 	    sbs->SetDoubleVariable("mFrameBottomEdgeWidth", 30 * etm::mm);
 	    sbs->SetDoubleVariable("mFrameTopEdgeWidth", 50 * etm::mm);
 	    sbs->SetDoubleVariable("mFrameSideEdgeWidth", 15 * etm::mm); 
-            sbs->SetDoubleVariable("mEntranceWindowThickness", 25 * etm::um);
+            sbs->SetDoubleVariable("mEntranceWindowThickness", 50 * etm::um); //25 um for both the entrance and exit
 	    sbs->SetDoubleVariable("mActiveWindowBottomWidth", Params[3] * etm::mm);
 	    sbs->SetDoubleVariable("mActiveWindowTopWidth", Params[2] * etm::mm);
 	    sbs->SetDoubleVariable("mActiveWindowHeight", Params[0] * etm::mm);
@@ -506,7 +506,7 @@ lter acceptance
 	    //cout << "Active Length: " << Params[0] << endl;
 
 	    //Far Hadron Side GEM disk
-	    Params = FullGEMParameters(3050, 1.05, 210, 12);
+	    Params = FullGEMParameters(3050, 1.2, 210, 12);
 	    MakeGEM(Params, fgt);
 	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
@@ -664,24 +664,16 @@ lter acceptance
 
 
 	#ifdef _GEMS_
-        // GEM tracker hits; should work;                                                                                                            \
+        // GEM tracker hits;
                                                                                                                                                       
-        kalman->add_phg4hits(fgt->GetG4HitName(),// const std::string& phg4hitsNames                                                                 \
+        kalman->add_phg4hits(fgt->GetG4HitName(),
                                                                                                                                                       
-                             PHG4TrackFastSim::Vertical_Plane,// const DETECTOR_TYPE phg4dettype                                                     \
-                                                                                                         
-                                                                                                                                                       
-                             250e-4, //999. // radial-resolution [cm] (this number is not used in cylindrical geometry)                                        \
-                                                                                                                                                      
-                             // Say 70um resolution?; [cm];                                                                                          \
-                                                                                                                                                      
-                             50e-4,        // azimuthal (arc-length) resolution [cm]                                                                 \
-                                                                                                                                                      
-                             999., //70e-4       // longitudinal (z) resolution [cm]                                                                       \
-                                                                                                                                                      
-                             1,// efficiency (fraction)                                                                                              \
-                                                                                                                                                      
-                             0);// hit noise                                                                                                         \
+                             PHG4TrackFastSim::Vertical_Plane,
+                             250e-4, //999. // radial-resolution [cm] (this number is not used in cylindrical geometry)                             
+                             50e-4,        // azimuthal (arc-length) resolution [cm]    
+                             999., //70e-4       // longitudinal (z) resolution [cm]                                                                   
+                             1,// efficiency (fraction)                                                                        
+                             0);// hit noise   
                                                                                                                                                       
 
 	#endif
