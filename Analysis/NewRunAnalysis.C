@@ -25,7 +25,7 @@
 #define _BINS_ 2
 
 //defines the variable to be plotted on the Y-axis:    0: resolution    1: dca2d    2: efficiency
-#define _NY_ 0
+#define _NY_ 2
 
 // 0: Momentum 1: Pseudo-Rapidity 
 //define which variable will be plotted on x axis
@@ -85,10 +85,10 @@ int DimensionArray[2] = { _NP_, _NEta_};
 #define _XMAX_ (1-_NDIM_)*(PMax+1)+(_NDIM_*(EtaMax+0.5))
 
 
-	int effpt[_NDet_][_NBField_][_NEta_][_NP_] = {0};
-	int effDenompt[_NDet_][_NBField_][_NEta_][_NP_] = {0};	
-	int eff[_NDet_][_NBField_][_NEta_][_NP_] = {0};
-	int effDenom[_NDet_][_NBField_][_NEta_][_NP_] = {0};	
+	double effpt[_NDet_][_NBField_][_NEta_][_NP_] = {0};
+	double effDenompt[_NDet_][_NBField_][_NEta_][_NP_] = {0};	
+	double eff[_NDet_][_NBField_][_NEta_][_NP_] = {0};
+	double effDenom[_NDet_][_NBField_][_NEta_][_NP_] = {0};	
 
 void MakeHistogram()
 {
@@ -374,14 +374,17 @@ void MakePlot()
 					else DCAHistName = Form("h_dca2d_%s_%s_P_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
 		        	    	
 					//Get Histogram
-		        	    	cout << "Getting: " << HistName << endl;
+		        	    	//cout << "Getting: " << HistName << endl;
 		        	    	TH1D *Htmp = (TH1D*)histoFile->Get(HistName);
 					if(!Htmp){ cout << "Histogram not found: " << HistName << endl; break;}
 		        	    	
-					cout << "Getting: " << DCAHistName << endl;
+					//cout << "Getting: " << DCAHistName << endl;
 		        	    	TH1D *Htmp2 = (TH1D*)histoFile->Get(DCAHistName);
 					if(!Htmp2){ cout << "Histogram not found: " << DCAHistName << endl; break;}
 
+
+					//cout << "Reco Tracks with " << MomentumValues[iP] << " < p_t < " << MomentumValues[iP+1] << " and " << AngleValues[iA] << " < eta < " << AngleValues[iA+1] << "for Detector " << iD+1 << " and Field " << iB+1 << ": " << effpt[iD][iB][iA][iP] << endl;
+					//cout << "Generated Tracks with " << MomentumValues[iP] << " < p_t < " << MomentumValues[iP+1] << " and " << AngleValues[iA] << " < eta < " << AngleValues[iA+1] << "for Detector " << iD+1 << " and Field " << iB+1 << ": " << effDenompt[iD][iB][iA][iP] << endl;
 
 				    	//Tweaking the histograms to attain a good fit (resolutions degrade at high eta, and the binning becomes too fine)
 				    	//This part is related to the art of proper histogram binning. One size does not fit all. You may need to tweak some of this yourself to ensure proper fitting
@@ -416,14 +419,10 @@ void MakePlot()
 					DCA2D[iA][iP][iD][iB] = DCAsigma*10000; //convert to um
 					DCA2DErr[iA][iP][iD][iB] = DCAerr*10000; // convert to um
 					
-				//	cout << "=============================================================" << endl;
-				//	cout << "EFFICIENCY CALCULATION" << endl;					
-				//	cout << "Reco Tracks: " << effpt[iA][iP][iD][iB] << endl;
-				//	cout << "Generated Tracks: " << effDenompt[iA][iP][iD][iB] << endl;
-				//	cout << "=============================================================" << endl;
 
-					if(_PT_ && effDenompt[iA][iP][iD][iB] != 0 ) Efficiency[iA][iP][iD][iB]= effpt[iA][iP][iD][iB]/effDenompt[iA][iP][iD][iB];
- 					else if (!_PT_ && effDenom[iA][iP][iD][iB] != 0 ) Efficiency[iA][iP][iD][iB]= eff[iA][iP][iD][iB]/effDenom[iA][iP][iD][iB];
+
+					if(_PT_ && effDenompt[iD][iB][iA][iP] != 0 ) Efficiency[iA][iP][iD][iB]= effpt[iD][iB][iA][iP]/effDenompt[iD][iB][iA][iP];
+ 					else if (!_PT_ && effDenom[iD][iB][iA][iP] != 0 ) Efficiency[iA][iP][iD][iB]= eff[iD][iB][iA][iP]/effDenom[iD][iB][iA][iP];
 					else {cout << "Division by 0! Setting Efficiency to 0" << endl; Efficiency[iA][iP][iD][iB] = 0;}
 	
 					TFile outfile("./Output/Fits.root", "UPDATE");
