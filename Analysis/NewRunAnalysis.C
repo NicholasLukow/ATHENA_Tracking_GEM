@@ -12,33 +12,34 @@
 //Here are the only parameters that need changing for most analyses
 
 //Draws the PWG Requirement line on the plot
-#define _DRAWPWGReq_ 0
+#define _DRAWPWGReq_ 0 
 //Select which requirement:    0: Far-Backward  1: Backward  2: Central  3: Forward  4: Far-Forward
-#define _PWGPlot_ 3
+#define _PWGPlot_ 0
 
 //Option to draw functional fit to the plots of the form: f(p) = SQRT( (A[%]*p)^2 + (B[%])^2 )
 #define _DRAWFITS_ 0
 
 //perform some rebinning of the residual histograms based on rapidity before fitting to ensure a good fit 
 //(see where it is used for more details, may need to tweak the precise behavior yourself depending on the distributions for your histograms) 
-#define _REBIN_ 1
-
+#define _REBIN_ 0
+//number for rebinning
+#define _BINS_ 2
 
 
 // 0: Momentum 1: Pseudo-Rapidity 
 //define which variable will be plotted on x axis
-#define _NDIM_ 0
+#define _NDIM_ 1
 
 //One of the following MUST have only 1 bin (the one not chosen above as the x axis variable)
 
 //Number of Eta Bins, and the minimum and maximum values
-#define _NEta_ 1
+#define _NEta_ 14
 double EtaMin = -3.5;
 double EtaMax = 3.5;
 
 
 //Number of Momentum Bins, and the minimum and maximum values
-#define _NP_ 30
+#define _NP_ 1
 double PMin = 1;
 double PMax =30;
 // Change from momentum to pt ( 0=p  1=pt)
@@ -48,20 +49,28 @@ double PMax =30;
 //The following parts correspond to the different simulations you have run and want to process data for
 
 //Give the number of detector configurations as well as the name used to identify it in the rootfile name and a longer description for labels
-#define _NDet_ 2
-std::string DetVers[_NDet_] = {"nominal", "WideGEM"};
-const char *DetectorFullName[_NDet_] = { "Nominal", "Wide GEM"};
+#define _NDet_ 4
+//std::string DetVers[_NDet_] = {"PtBSi"};
+//const char *DetectorFullName[_NDet_] = {"Berkeley Si Hybrid"};
+std::string DetVers[_NDet_] = {"BSiONLY", "BSiNoGEM","BSiNoBMT", "BerkeleySi"};
+const char *DetectorFullName[_NDet_] = {"Berkeley Silicon Tracker Only", "Berkeley Silicon Hybrid without GEM Disks", "Berkeley Silicon Hybrid without BMT", "Berkeley Silicon Hybrid"};
+//std::string DetVers[_NDet_] = {"Nominal", "NewMaterialFwdCombo", "WideGEM5Si"};
+//const char *DetectorFullName[_NDet_] = {"Nominal","5 Si Disks + Wide GEMs with RICH+AuLayer", "5 Si Disks + Wide GEMs"};
 
 //Give the number of field maps as well as the name used to identify it in the rootfile name and a longer description for labels
 #define _NBField_ 1
 std::string BField[_NBField_] = {"ATHENA"};
-const char *FieldMapName[_NBField_] = {"ATHENA"};
+const char *FieldMapName[_NBField_] = {"05-28 BeAST Field Map Update"}; 
+//std::string BField[_NBField_] = {"ATHENA", "NewBeAST", "Beast", "B_3.0T"};
+//const char *FieldMapName[_NBField_] = {"05-28 BeAST Field Map Update", "05-07 BeAST Field Map Update", "Original BeAST Field Map", "Uniform 3.0T"};
 //std::string BField[_NBField_] = {"Beast", "ATHENA", "B_3.0T"};
 //const char *FieldMapName[_NBField_] = {"Beast", "ATHENA", "Uniform 3.0T"};
 
 //Set the number of plots you will compare (Currently it is only written to compare different BFields/Detectors on the same plot)
 #define _NPLOTS_ _NDet_
 
+//The maximum value for the y-axis. This will automatically be increased to be larger than the largest y-value if it is set too low
+double ymax = 1.6;
 
 //---------------------------------------------------------------------------------------------------------------------------------------  
 //=======================================================================================================================================
@@ -70,7 +79,6 @@ const char *FieldMapName[_NBField_] = {"ATHENA"};
 
 
 //defining some global variables/arrays
-double ymax = 0;
 double AngleValues[_NEta_ + 1];
 double MomentumValues[_NP_ + 1];
 int DimensionArray[2] = { _NP_, _NEta_};
@@ -86,6 +94,10 @@ void MakeHistogram()
 	TH1D *h_momRes[_NDet_][_NBField_][_NEta_][_NP_], *h_ptRes[_NDet_][_NBField_][_NEta_][_NP_];
 	TH2D *h_nHits_momBin[_NDet_][_NBField_][_NEta_][_NP_], *h_nHits_ptBin[_NDet_][_NBField_][_NEta_][_NP_];
 
+	//TEMP
+	TH1D *hETA[_NDet_][_NBField_][_NEta_][_NP_];
+	TH1D *hrETA[_NDet_][_NBField_][_NEta_][_NP_];
+
 	for (int iDet = 0; iDet < _NDet_; iDet++)
 	{
 		for (int iB = 0; iB < _NBField_; iB++)
@@ -97,21 +109,27 @@ void MakeHistogram()
 					//Creating the histograms with unique names, these names will be used later to grab the proper histogram for analysis
 					h_momRes[iDet][iB][iEta][iP] = new TH1D(Form("h_momRes_%s_%s_P_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("dp/p for %0.1lf < p < %0.1lf and %0.1lf < #eta < %0.1lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1, 1);
 					h_ptRes[iDet][iB][iEta][iP] = new TH1D(Form("h_ptRes_%s_%s_Pt_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("dpt/pt for %0.1lf < pt < %0.1lf and %0.1lf < #eta < %0.1lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1, 1);
-					h_nHits_momBin[iDet][iB][iEta][iP] = new TH2D(Form("h_nHits_MomentumBin_%s_%s_P_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf", DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Hits in each detector for %0.1lf < p < %0.1lf and %0.1lf < #eta < %0.1lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 4, 0, 4, 10, 0, 10);
-					h_nHits_ptBin[iDet][iB][iEta][iP] = new TH2D(Form("h_nHits_PtBin_%s_%s_Pt_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf", DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Hits in each detector for %0.1lf < pt < %0.1lf and %0.1lf < #eta < %0.1lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 4, 0, 4, 10, 0, 10);
+					h_nHits_momBin[iDet][iB][iEta][iP] = new TH2D(Form("h_nHits_MomentumBin_%s_%s_P_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf", DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Hits in each detector for %0.1lf < p < %0.1lf and %0.1lf < #eta < %0.1lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 5, 0, 5, 10, 0, 10);
+					h_nHits_ptBin[iDet][iB][iEta][iP] = new TH2D(Form("h_nHits_PtBin_%s_%s_Pt_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf", DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Hits in each detector for %0.1lf < pt < %0.1lf and %0.1lf < #eta < %0.1lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 5, 0, 5, 10, 0, 10);
+
+
+					hETA[iDet][iB][iEta][iP] = new TH1D(Form("hETA_%s_%s_P_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("ETA for %0.1lf < p < %0.1lf and %0.1lf < #eta < %0.1lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1, 1);
+					hrETA[iDet][iB][iEta][iP] = new TH1D(Form("hRECOETA_%s_%s_P_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("RECO ETA for %0.1lf < p < %0.1lf and %0.1lf < #eta < %0.1lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1, 1);
 
 					//setting names for the hit histogram
-					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(1,"Si Vtx and Barrel");
-					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(2,"Barrel MPGD Tracker");
-					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(3,"GEM Disks");
-					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(4,"Si Disks");
+					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(1,"Si Vtx");
+					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(2,"Si Barrel");
+					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(3,"Barrel MPGD Tracker");
+					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(4,"GEM Disks");
+					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(5,"Si Disks");
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetYaxis()->SetTitle("Hits");
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetTitle("Detector");
 
-					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(1,"Si Vtx and Barrel");
-					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(2,"Barrel MPGD Tracker");
-					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(3,"GEM Disks");
-					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(4,"Si Disks");
+					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(1,"Si Vtx");
+					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(2,"Si Barrel");
+					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(3,"Barrel MPGD Tracker");
+					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(4,"GEM Disks");
+					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(5,"Si Disks");
 					h_nHits_ptBin[iDet][iB][iEta][iP]->GetYaxis()->SetTitle("Hits");
 					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetTitle("Detector");
 
@@ -144,6 +162,7 @@ void MakeHistogram()
    	Float_t         pcay;
    	Float_t         pcaz;
    	Int_t	   nHits_FGT;
+   	Int_t	   nHits_SVTX;
    	Int_t 	   nHits_FBST;
    	Int_t	   nHits_BARR;
    	Int_t 	   nHits_BMT;
@@ -192,6 +211,7 @@ void MakeHistogram()
 			   tree->SetBranchAddress("pcay", &pcay);
 			   tree->SetBranchAddress("pcaz", &pcaz);
 			   tree->SetBranchAddress("nHit_G4HIT_FGT", &nHits_FGT);
+			   tree->SetBranchAddress("nHit_G4HIT_SVTX", &nHits_SVTX);
 			   tree->SetBranchAddress("nHit_G4HIT_FBST", &nHits_FBST);
 			   tree->SetBranchAddress("nHit_G4HIT_BARR", &nHits_BARR);
 			   tree->SetBranchAddress("nHit_G4HIT_BMT", &nHits_BMT);
@@ -222,19 +242,24 @@ void MakeHistogram()
 								if (truthP.Mag() >= MomentumValues[iP] && truthP.Mag() <= MomentumValues[iP+1])
 								{
 									h_momRes[iDet][iB][iEta][iP]->Fill( (recoP.Mag() - truthP.Mag())/truthP.Mag());  
-									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(0., nHits_BARR);
-									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(1., nHits_BMT);
-									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(2., nHits_FGT);
-									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(3., nHits_FBST);
+									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(0., nHits_SVTX);
+									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(1., nHits_BARR);
+									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(2., nHits_BMT);
+									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(3., nHits_FGT);
+									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(4., nHits_FBST);
+									
+									hETA[iDet][iB][iEta][iP]->Fill( truthP.Eta() );  
+									hrETA[iDet][iB][iEta][iP]->Fill( recoP.Eta() );  
 								}
 								//filling histograms which are binned in pt
 								if (truthP.Pt() >= MomentumValues[iP] && truthP.Pt() <= MomentumValues[iP+1])
 								{
 									h_ptRes[iDet][iB][iEta][iP]->Fill( (recoP.Pt() - truthP.Pt())/truthP.Pt());  
-									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(0., nHits_BARR);
-									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(1., nHits_BMT);
-									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(2., nHits_FGT);
-									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(3., nHits_FBST);
+									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(0., nHits_SVTX);
+									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(1., nHits_BARR);
+									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(2., nHits_BMT);
+									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(3., nHits_FGT);
+									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(4., nHits_FBST);
 								}
 							}
 
@@ -256,6 +281,10 @@ void MakeHistogram()
 					h_ptRes[iDet][iB][iEta][iP]->Write();
 					h_nHits_ptBin[iDet][iB][iEta][iP]->Write();
 					h_nHits_momBin[iDet][iB][iEta][iP]->Write();
+
+					hETA[iDet][iB][iEta][iP]->Write();
+					hrETA[iDet][iB][iEta][iP]->Write();
+					
 
 				}
 			}
@@ -318,15 +347,14 @@ void MakePlot()
 				    	//This part is related to the art of proper histogram binning. One size does not fit all. You may need to tweak some of this yourself to ensure proper fitting
 					if (_REBIN_)
 				    	{
-				    		if (TMath::Abs(AngleValues[iA]) < 2.5) Htmp->GetXaxis()->SetRangeUser(-0.1, 0.1);
-				    		else if(TMath::Abs(AngleValues[iA]) == 2.5 ) Htmp->GetXaxis()->SetRangeUser(-0.2,0.2);
+				    		if (TMath::Abs(AngleValues[iA]) < 2.5) Htmp->GetXaxis()->SetRangeUser(-0.15, 0.15);
 				    		else
 				    		{
 							Htmp->GetXaxis()->SetRangeUser(-0.3,0.3);
-							Htmp->Rebin(10);
+							Htmp->Rebin(_BINS_);
 						}
 					}
-					else  Htmp->GetXaxis()->SetRangeUser(-0.15, 0.15); //for most central rapidity tracks, the residuals don't exceed 15%
+					else  Htmp->GetXaxis()->SetRangeUser(-0.15, 0.15); //for most tracks, the residuals don't exceed 15%
 		
 					//Extract the value from the histogram and store in array	
 			        	TF1 *gausFit = new TF1("gausFit", "gaus");
@@ -474,7 +502,7 @@ for (int iD = 0; iD < _NDet_; iD++)
     hdum->GetXaxis()->SetTitleOffset(0.90);
     hdum->GetYaxis()->SetTitleOffset(0.75);
     hdum->SetMinimum( 0 );
-    hdum->SetMaximum( ymax+0.5 );
+    hdum->SetMaximum( ymax+0.25*ymax );
    
     //Title will be automatically set (since either p/eta is integrated over, it will be noted in the title) 
     if (_NDIM_ == 0) hdum->SetTitle(Form( "Resolution for tracks with %0.1lf < #eta < %0.1lf", EtaMin, EtaMax));
@@ -498,7 +526,7 @@ for (int iD = 0; iD < _NDet_; iD++)
 
 
 
-TLegend *legend = new TLegend(.35, .70, .65, .92);
+TLegend *legend = new TLegend(.15, .7, .45, .92);
 for (int iPlot = 0; iPlot < _NPLOTS_; iPlot++)
 { 
      
@@ -508,8 +536,8 @@ for (int iPlot = 0; iPlot < _NPLOTS_; iPlot++)
 
      //legend->AddEntry(gResPlot[iPlot], Form("Hybrid Detector Resolution for %0.1lf < #eta < %0.1lf", AngleValues[0], AngleValues[1]  ), "P");
  
-     if (_NDet_ > 1 ) legend->AddEntry(gResPlot[iPlot], Form("Detector Version: %s", DetectorFullName[iPlot]), "P");
-     else if (_NBField_ > 1) legend->AddEntry(gResPlot[iPlot], Form("FieldMap: %s", FieldMapName[iPlot]), "P");
+     if (_NDet_ > 1 && _NBField_ == 1 ) legend->AddEntry(gResPlot[iPlot], Form("Detector Version: %s", DetectorFullName[iPlot]), "P");
+     else if (_NBField_ > 1 && _NDet_ == 1) legend->AddEntry(gResPlot[iPlot], Form("FieldMap: %s", FieldMapName[iPlot]), "P");
      else legend->AddEntry(gResPlot[iPlot], "Resolution", "P");
 }
 
