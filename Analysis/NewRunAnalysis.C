@@ -1,4 +1,3 @@
-#define Analyze_cxx
 #include <TVector3.h>
 #include <TH2.h>
 #include <TStyle.h>
@@ -12,9 +11,9 @@
 //Here are the only parameters that need changing for most analyses
 
 //Draws the PWG Requirement line on the plot
-#define _DRAWPWGReq_ 0 
+#define _DRAWPWGReq_ 0
 //Select which requirement:    0: Far-Backward  1: Backward  2: Central  3: Forward  4: Far-Forward
-#define _PWGPlot_ 0
+#define _PWGPlot_ 4
 
 //Option to draw functional fit to the plots of the form: f(p) = SQRT( (A[%]*p)^2 + (B[%])^2 )
 #define _DRAWFITS_ 0
@@ -25,52 +24,52 @@
 //number for rebinning
 #define _BINS_ 2
 
+//defines the variable to be plotted on the Y-axis:    0: resolution    1: dca2d    2: efficiency
+#define _NY_ 0
 
 // 0: Momentum 1: Pseudo-Rapidity 
 //define which variable will be plotted on x axis
-#define _NDIM_ 1
+#define _NDIM_ 0
 
 //One of the following MUST have only 1 bin (the one not chosen above as the x axis variable)
 
 //Number of Eta Bins, and the minimum and maximum values
-#define _NEta_ 14
-double EtaMin = -3.5;
-double EtaMax = 3.5;
+#define _NEta_ 1
+double EtaMin = -2.5;
+double EtaMax = -1.;
 
 
 //Number of Momentum Bins, and the minimum and maximum values
-#define _NP_ 1
+#define _NP_ 29
 double PMin = 1;
 double PMax =30;
 // Change from momentum to pt ( 0=p  1=pt)
-#define _PT_ 0
+#define _PT_ 1
 
 
 //The following parts correspond to the different simulations you have run and want to process data for
 
 //Give the number of detector configurations as well as the name used to identify it in the rootfile name and a longer description for labels
-#define _NDet_ 4
-//std::string DetVers[_NDet_] = {"PtBSi"};
-//const char *DetectorFullName[_NDet_] = {"Berkeley Si Hybrid"};
-std::string DetVers[_NDet_] = {"BSiONLY", "BSiNoGEM","BSiNoBMT", "BerkeleySi"};
-const char *DetectorFullName[_NDet_] = {"Berkeley Silicon Tracker Only", "Berkeley Silicon Hybrid without GEM Disks", "Berkeley Silicon Hybrid without BMT", "Berkeley Silicon Hybrid"};
+#define _NDet_ 1
+std::string DetVers[_NDet_] = {"PtBSi"};
+const char *DetectorFullName[_NDet_] = {"Berkeley Si Hybrid"};
+//std::string DetVers[_NDet_] = {"BSiONLY", "BSiNoGEM","BSiNoBMT", "BerkeleySi"};
+//const char *DetectorFullName[_NDet_] = {"Berkeley Silicon Tracker Only", "Berkeley Silicon Hybrid without GEM Disks", "Berkeley Silicon Hybrid without BMT", "Berkeley Silicon Hybrid"};
 //std::string DetVers[_NDet_] = {"Nominal", "NewMaterialFwdCombo", "WideGEM5Si"};
 //const char *DetectorFullName[_NDet_] = {"Nominal","5 Si Disks + Wide GEMs with RICH+AuLayer", "5 Si Disks + Wide GEMs"};
 
 //Give the number of field maps as well as the name used to identify it in the rootfile name and a longer description for labels
-#define _NBField_ 1
-std::string BField[_NBField_] = {"ATHENA"};
-const char *FieldMapName[_NBField_] = {"05-28 BeAST Field Map Update"}; 
-//std::string BField[_NBField_] = {"ATHENA", "NewBeAST", "Beast", "B_3.0T"};
-//const char *FieldMapName[_NBField_] = {"05-28 BeAST Field Map Update", "05-07 BeAST Field Map Update", "Original BeAST Field Map", "Uniform 3.0T"};
+#define _NBField_ 4
+std::string BField[_NBField_] = {"ATHENA", "NewBeAST", "Beast", "B_3.0T"};
+const char *FieldMapName[_NBField_] = {"05-28 BeAST Field Map Update", "05-07 BeAST Field Map Update", "Original BeAST Field Map", "Uniform 3.0T"};
 //std::string BField[_NBField_] = {"Beast", "ATHENA", "B_3.0T"};
 //const char *FieldMapName[_NBField_] = {"Beast", "ATHENA", "Uniform 3.0T"};
 
 //Set the number of plots you will compare (Currently it is only written to compare different BFields/Detectors on the same plot)
-#define _NPLOTS_ _NDet_
+#define _NPLOTS_ _NBField_
 
 //The maximum value for the y-axis. This will automatically be increased to be larger than the largest y-value if it is set too low
-double ymax = 1.6;
+double ymax =0;// 1.6;
 
 //---------------------------------------------------------------------------------------------------------------------------------------  
 //=======================================================================================================================================
@@ -86,6 +85,10 @@ int DimensionArray[2] = { _NP_, _NEta_};
 #define _XMAX_ (1-_NDIM_)*(PMax+1)+(_NDIM_*(EtaMax+0.5))
 
 
+	int effpt[_NDet_][_NBField_][_NEta_][_NP_] = {0};
+	int effDenompt[_NDet_][_NBField_][_NEta_][_NP_] = {0};	
+	int eff[_NDet_][_NBField_][_NEta_][_NP_] = {0};
+	int effDenom[_NDet_][_NBField_][_NEta_][_NP_] = {0};	
 
 void MakeHistogram()
 {
@@ -93,6 +96,11 @@ void MakeHistogram()
 	//Defining Histograms and variables
 	TH1D *h_momRes[_NDet_][_NBField_][_NEta_][_NP_], *h_ptRes[_NDet_][_NBField_][_NEta_][_NP_];
 	TH2D *h_nHits_momBin[_NDet_][_NBField_][_NEta_][_NP_], *h_nHits_ptBin[_NDet_][_NBField_][_NEta_][_NP_];
+
+	TH1D *h_dca2d[_NDet_][_NBField_][_NEta_][_NP_]; 
+	//pt binned versions
+	TH1D *h_dca2dpt[_NDet_][_NBField_][_NEta_][_NP_]; 
+	
 
 	//TEMP
 	TH1D *hETA[_NDet_][_NBField_][_NEta_][_NP_];
@@ -116,6 +124,8 @@ void MakeHistogram()
 					hETA[iDet][iB][iEta][iP] = new TH1D(Form("hETA_%s_%s_P_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("ETA for %0.1lf < p < %0.1lf and %0.1lf < #eta < %0.1lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1, 1);
 					hrETA[iDet][iB][iEta][iP] = new TH1D(Form("hRECOETA_%s_%s_P_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("RECO ETA for %0.1lf < p < %0.1lf and %0.1lf < #eta < %0.1lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1, 1);
 
+					h_dca2d[iDet][iB][iEta][iP] = new TH1D(Form("h_dca2d_%s_%s_P_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA2D for %0.1lf < p < %0.1lf and %0.1lf < #eta < %0.1lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -0.1, 0.1);
+					h_dca2dpt[iDet][iB][iEta][iP] = new TH1D(Form("h_dca2dpt_%s_%s_Pt_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA2D for %0.1lf < p_t < %0.1lf and %0.1lf < #eta < %0.1lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -0.1, 0.1);
 					//setting names for the hit histogram
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(1,"Si Vtx");
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(2,"Si Barrel");
@@ -161,6 +171,7 @@ void MakeHistogram()
    	Float_t         pcax;
    	Float_t         pcay;
    	Float_t         pcaz;
+   	Float_t         dca2d;
    	Int_t	   nHits_FGT;
    	Int_t	   nHits_SVTX;
    	Int_t 	   nHits_FBST;
@@ -210,6 +221,7 @@ void MakeHistogram()
 			   tree->SetBranchAddress("pcax", &pcax);
 			   tree->SetBranchAddress("pcay", &pcay);
 			   tree->SetBranchAddress("pcaz", &pcaz);
+			   tree->SetBranchAddress("dca2d", &dca2d);
 			   tree->SetBranchAddress("nHit_G4HIT_FGT", &nHits_FGT);
 			   tree->SetBranchAddress("nHit_G4HIT_SVTX", &nHits_SVTX);
 			   tree->SetBranchAddress("nHit_G4HIT_FBST", &nHits_FBST);
@@ -226,20 +238,21 @@ void MakeHistogram()
 				TVector3 truthP(gpx, gpy, gpz);
 				TVector3 recoP(px, py, pz);
 
-				//making sure there is a reconstructed track
-				if (trackID != -9999)
+				//Loop over eta as to store information in the properly indexed histogram
+				for (int iEta = 0; iEta < _NEta_; iEta++)
 				{
-					//Loop over eta as to store information in the properly indexed histogram
-					for (int iEta = 0; iEta < _NEta_; iEta++)
+					//Loop over momentum as to store information in the properly indexed histogram
+					for (int iP = 0; iP < _NP_; iP++)
 					{
-						//Loop over momentum as to store information in the properly indexed histogram
-						for (int iP = 0; iP < _NP_; iP++)
+						//theres probably a better way than loops and if-statements to determine the proper indexed histogram for a given track, but this works
+						if (truthP.Eta() >= AngleValues[iEta] && truthP.Eta() <= AngleValues[iEta+1]) 
 						{
-							//theres probably a better way than loops and if-statements to determine the proper indexed histogram for a given track, but this works
-							if (truthP.Eta() >= AngleValues[iEta] && truthP.Eta() <= AngleValues[iEta+1]) 
+							//filling histograms which are binned in momentum
+							if (truthP.Mag() >= MomentumValues[iP] && truthP.Mag() <= MomentumValues[iP+1])
 							{
-								//filling histograms which are binned in momentum
-								if (truthP.Mag() >= MomentumValues[iP] && truthP.Mag() <= MomentumValues[iP+1])
+								effDenom[iDet][iB][iEta][iP] +=1;
+								//making sure there is a reconstructed track
+								if (trackID != -9999)
 								{
 									h_momRes[iDet][iB][iEta][iP]->Fill( (recoP.Mag() - truthP.Mag())/truthP.Mag());  
 									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(0., nHits_SVTX);
@@ -247,12 +260,20 @@ void MakeHistogram()
 									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(2., nHits_BMT);
 									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(3., nHits_FGT);
 									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(4., nHits_FBST);
-									
+								
+									eff[iDet][iB][iEta][iP] += 1;	
+									h_dca2d[iDet][iB][iEta][iP]->Fill(dca2d);
+								
 									hETA[iDet][iB][iEta][iP]->Fill( truthP.Eta() );  
 									hrETA[iDet][iB][iEta][iP]->Fill( recoP.Eta() );  
 								}
-								//filling histograms which are binned in pt
-								if (truthP.Pt() >= MomentumValues[iP] && truthP.Pt() <= MomentumValues[iP+1])
+							}
+							//filling histograms which are binned in pt
+							if (truthP.Pt() >= MomentumValues[iP] && truthP.Pt() <= MomentumValues[iP+1])
+							{
+								effDenompt[iDet][iB][iEta][iP] +=1;
+								//making sure there is a reconstructed track
+								if (trackID != -9999)
 								{
 									h_ptRes[iDet][iB][iEta][iP]->Fill( (recoP.Pt() - truthP.Pt())/truthP.Pt());  
 									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(0., nHits_SVTX);
@@ -260,14 +281,16 @@ void MakeHistogram()
 									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(2., nHits_BMT);
 									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(3., nHits_FGT);
 									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(4., nHits_FBST);
+									
+									effpt[iDet][iB][iEta][iP] += 1;	
+									h_dca2dpt[iDet][iB][iEta][iP]->Fill(dca2d);
 								}
+
 							}
+						}//end Eta if
 
-						} //end loop over momentum values
-					} //end loop over eta values
-
-				} 
-
+					} //end loop over momentum values
+				} //end loop over eta values
 			} //end loop over events
 
 
@@ -282,9 +305,13 @@ void MakeHistogram()
 					h_nHits_ptBin[iDet][iB][iEta][iP]->Write();
 					h_nHits_momBin[iDet][iB][iEta][iP]->Write();
 
+					h_dca2d[iDet][iB][iEta][iP]->Write();
+					h_dca2dpt[iDet][iB][iEta][iP]->Write();
+					
 					hETA[iDet][iB][iEta][iP]->Write();
 					hrETA[iDet][iB][iEta][iP]->Write();
 					
+
 
 				}
 			}
@@ -322,6 +349,11 @@ void MakePlot()
 	//Get values from histograms and store in arrays
 	double Resolution[_NEta_][_NP_][_NDet_][_NBField_]; 
 	double ResErr[_NEta_][_NP_][_NDet_][_NBField_];
+	double Efficiency[_NEta_][_NP_][_NDet_][_NBField_]; 
+	double DCA2D[_NEta_][_NP_][_NDet_][_NBField_]; 
+	double DCA2DErr[_NEta_][_NP_][_NDet_][_NBField_]; 
+
+
 
 	for (int iD = 0; iD < _NDet_; iD++)
 	{
@@ -336,11 +368,19 @@ void MakePlot()
 					if (_PT_) HistName = Form("h_ptRes_%s_%s_Pt_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
 					else HistName = Form("h_momRes_%s_%s_P_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
 
-
-		        	    	//Get Histogram
+					//Construct DCA Histo Name
+					TString DCAHistName;
+					if (_PT_) DCAHistName = Form("h_dca2dpt_%s_%s_Pt_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+					else DCAHistName = Form("h_dca2d_%s_%s_P_%0.1lf_%0.1lf_Eta_%0.1lf_%0.1lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+		        	    	
+					//Get Histogram
 		        	    	cout << "Getting: " << HistName << endl;
 		        	    	TH1D *Htmp = (TH1D*)histoFile->Get(HistName);
 					if(!Htmp){ cout << "Histogram not found: " << HistName << endl; break;}
+		        	    	
+					cout << "Getting: " << DCAHistName << endl;
+		        	    	TH1D *Htmp2 = (TH1D*)histoFile->Get(DCAHistName);
+					if(!Htmp2){ cout << "Histogram not found: " << DCAHistName << endl; break;}
 
 
 				    	//Tweaking the histograms to attain a good fit (resolutions degrade at high eta, and the binning becomes too fine)
@@ -366,9 +406,29 @@ void MakePlot()
 
 				    	Resolution[iA][iP][iD][iB] = sigma*100; //make it a percent
 	            			ResErr[iA][iP][iD][iB] = sigmaErr*100; //make it a percent
+
+			        	TF1 *gausFit2 = new TF1("gausFit2", "gaus");
+			        	gausFit2->SetParameter(1, 0);
+	       		     		Htmp2->Fit(gausFit2, "Q");
+					double DCAsigma = gausFit2->GetParameter(2);
+					double DCAerr = gausFit2->GetParError(2);
+										
+					DCA2D[iA][iP][iD][iB] = DCAsigma*10000; //convert to um
+					DCA2DErr[iA][iP][iD][iB] = DCAerr*10000; // convert to um
+					
+				//	cout << "=============================================================" << endl;
+				//	cout << "EFFICIENCY CALCULATION" << endl;					
+				//	cout << "Reco Tracks: " << effpt[iA][iP][iD][iB] << endl;
+				//	cout << "Generated Tracks: " << effDenompt[iA][iP][iD][iB] << endl;
+				//	cout << "=============================================================" << endl;
+
+					if(_PT_ && effDenompt[iA][iP][iD][iB] != 0 ) Efficiency[iA][iP][iD][iB]= effpt[iA][iP][iD][iB]/effDenompt[iA][iP][iD][iB];
+ 					else if (!_PT_ && effDenom[iA][iP][iD][iB] != 0 ) Efficiency[iA][iP][iD][iB]= eff[iA][iP][iD][iB]/effDenom[iA][iP][iD][iB];
+					else {cout << "Division by 0! Setting Efficiency to 0" << endl; Efficiency[iA][iP][iD][iB] = 0;}
 	
 					TFile outfile("./Output/Fits.root", "UPDATE");
 					Htmp->Write();
+					Htmp2->Write();
 					outfile.Close();
 
 			        }//End B Loop
@@ -442,10 +502,26 @@ for (int iD = 0; iD < _NDet_; iD++)
 	      	{
 		  	for (int iA = 0; iA < _NEta_; iA++)
 	          	{
-   	  	  	  res[index] = Resolution[iA][iP][iD][iB];
-   	  	  	  reserr[index] = ResErr[iA][iP][iD][iB];
-			  index++;
-			  if ( Resolution[iA][iP][iD][iB] > ymax) ymax = Resolution[iA][iP][iD][iB];
+
+			  
+				if (_NY_ == 0)
+   	  	  	  	{
+					res[index] = Resolution[iA][iP][iD][iB];
+   	  	  	  		reserr[index] = ResErr[iA][iP][iD][iB];
+			  	}
+				else if(_NY_ == 1)
+				{
+					res[index] = DCA2D[iA][iP][iD][iB];
+					reserr[index] = DCA2DErr[iA][iP][iD][iB];
+				}
+				else if (_NY_ == 2)
+				{
+					res[index] = Efficiency[iA][iP][iD][iB];
+					reserr[index] = 0;
+				}
+				else {cout << "No Valid Choice of Y variable. Exiting..." << endl; break;}
+				if ( res[index] > ymax) ymax = res[index];
+			  	index++;
 			}//End Angle Loop
 		}//End Momentum Loop
      		
@@ -477,7 +553,7 @@ for (int iD = 0; iD < _NDet_; iD++)
 	}//End B Field Loop
 } //End Detector Loop
 
- 
+
     //Creating a dummy histogram which will be formatted
     TH1D *hdum  = new TH1D("hdum",   "", 15, _XMIN_, _XMAX_);
 
@@ -493,9 +569,19 @@ for (int iD = 0; iD < _NDet_; iD++)
 
     hdum->GetXaxis()->SetTitleSize(_TSIZE_);
     hdum->GetXaxis()->SetLabelSize(_LSIZE_);
-    if (_PT_) hdum->GetYaxis()->SetTitle("p_{T} resolution   #sigma_{p_{T}} /p_{T}  [%]");
-    else hdum->GetYaxis()->SetTitle("p resolution   #sigma_{p} /p  [%]");
-    
+    if(_NY_ == 0)
+    {
+    	if (_PT_) hdum->GetYaxis()->SetTitle("p_{T} resolution   #sigma_{p_{T}} /p_{T}  [%]");
+    	else hdum->GetYaxis()->SetTitle("p resolution   #sigma_{p} /p  [%]");
+    }
+    else if (_NY_ == 1)
+    {
+    	hdum->GetYaxis()->SetTitle("#sigma_{DCA_{2D}} [#mum]");
+    }
+    else if (_NY_ == 2)
+    {
+    	hdum->GetYaxis()->SetTitle("Efficiency");
+    }
     
     hdum->GetYaxis()->SetTitleSize(_TSIZE_);
     hdum->GetYaxis()->SetLabelSize(_LSIZE_);
@@ -503,12 +589,27 @@ for (int iD = 0; iD < _NDet_; iD++)
     hdum->GetYaxis()->SetTitleOffset(0.75);
     hdum->SetMinimum( 0 );
     hdum->SetMaximum( ymax+0.25*ymax );
-   
-    //Title will be automatically set (since either p/eta is integrated over, it will be noted in the title) 
-    if (_NDIM_ == 0) hdum->SetTitle(Form( "Resolution for tracks with %0.1lf < #eta < %0.1lf", EtaMin, EtaMax));
-    if (_NDIM_ == 1 && !_PT_) hdum->SetTitle(Form( "Resolution for tracks with %0.1lf < p < %0.1lf", PMin, PMax));
-    if (_NDIM_ == 1 && _PT_) hdum->SetTitle(Form( "Resolution for tracks with %0.1lf < p_T < %0.1lf", PMin, PMax));
 
+ 
+    //Title will be automatically set (since either p/eta is integrated over, it will be noted in the title) 
+    if (_NY_ ==0 )
+    {
+	if (_NDIM_ == 0) hdum->SetTitle(Form( "Resolution for tracks with %0.1lf < #eta < %0.1lf", EtaMin, EtaMax));
+	if (_NDIM_ == 1 && !_PT_) hdum->SetTitle(Form( "Resolution for tracks with %0.1lf < p < %0.1lf", PMin, PMax));
+	if (_NDIM_ == 1 && _PT_) hdum->SetTitle(Form( "Resolution for tracks with %0.1lf < p_T < %0.1lf", PMin, PMax));
+    }
+    else if (_NY_ == 1 )
+    {
+	if (_NDIM_ == 0) hdum->SetTitle(Form( "DCA2D for tracks with %0.1lf < #eta < %0.1lf", EtaMin, EtaMax));
+	if (_NDIM_ == 1 && !_PT_) hdum->SetTitle(Form( "DCA2D for tracks with %0.1lf < p < %0.1lf", PMin, PMax));
+	if (_NDIM_ == 1 && _PT_) hdum->SetTitle(Form( "DCA2D for tracks with %0.1lf < p_T < %0.1lf", PMin, PMax));
+    }
+    else if (_NY_ == 2 )
+    {
+	if (_NDIM_ == 0) hdum->SetTitle(Form( "Efficiency for tracks with %0.1lf < #eta < %0.1lf", EtaMin, EtaMax));
+	if (_NDIM_ == 1 && !_PT_) hdum->SetTitle(Form( "Efficiency for tracks with %0.1lf < p < %0.1lf", PMin, PMax));
+	if (_NDIM_ == 1 && _PT_) hdum->SetTitle(Form( "Efficiency for tracks with %0.1lf < p_T < %0.1lf", PMin, PMax));
+    }
 
     //hdum->GetXaxis()->SetNdivisions(408);
     //hdum->GetYaxis()->SetNdivisions(804);
