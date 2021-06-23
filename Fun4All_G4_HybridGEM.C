@@ -137,12 +137,28 @@ void Fun4All_G4_HybridGEM(
 	double pix_size_bar = 10.; // um - size of pixels in barrel layers
 	double pix_size_dis = 10.; // um - size of pixels in disk layers
 	const int nDisks_per_side = 5;
+	const int do_projections = 1;
+	// Parameters for projections
+	string projname1   = "DIRC";            // Cylindrical surface object name
+	double projradius1 = 112;// 80.;               // [cm] 
+	//NOTE: these surfaces are black holes. Care must be taken in the choice of dimensions as to not absorb particles within the acceptance of other detectors
+	double length1     = 230; //200.;              // [cm]
+	// ---
+	double thinness    = 0.1;               // black hole thickness, needs to be taken into account for the z positions
+	// ---
+	string projname2   = "FOR";             // Forward plane object name
+	double projzpos2   = 315+thinness/2.;   // [cm]
+	double projradius2 = 210.;               // [cm]
+	// ---
+	string projname3   = "BACK";            // Backward plane object name
+	double projzpos3   = -(195+thinness/2.);// [cm]
+	double projradius3 = 170.;               // [cm]
 	// ======================================================================================================
 	// Make the Server
 	Fun4AllServer *se = Fun4AllServer::instance();
 	// If you want to fix the random seed for reproducibility
-	// recoConsts *rc = recoConsts::instance();
-	// rc->set_IntFlag("RANDOMSEED", 12345);
+	 recoConsts *rc = recoConsts::instance();
+	 rc->set_IntFlag("RANDOMSEED", 12345);
 	// ======================================================================================================
 	// Particle Generator Setup
 	PHG4ParticleGenerator *gen = new PHG4ParticleGenerator();
@@ -212,6 +228,44 @@ void Fun4All_G4_HybridGEM(
 	// Detector setup
 	PHG4CylinderSubsystem *cyl;
 	
+	if(do_projections){
+		PHG4CylinderSubsystem *cyl;
+		cyl = new PHG4CylinderSubsystem(projname1,0);
+		cyl->set_double_param("length", length1);
+		cyl->set_double_param("radius", projradius1); // dirc radius
+		cyl->set_double_param("thickness", 0.1); // needs some thickness
+		cyl->set_string_param("material", "G4_AIR");
+		cyl->SetActive(1);
+		cyl->SuperDetector(projname1);
+		cyl->BlackHole();
+		cyl->set_color(1,0,0,0.7); //reddish
+		g4Reco->registerSubsystem(cyl);
+
+		cyl = new PHG4CylinderSubsystem(projname2,0);
+		cyl->set_double_param("length", thinness);
+		cyl->set_double_param("radius", 2); // beampipe needs to fit here
+		cyl->set_double_param("thickness", projradius2); // 
+		cyl->set_string_param("material", "G4_AIR");
+		cyl->set_double_param("place_z", projzpos2);
+		cyl->SetActive(1);
+		cyl->SuperDetector(projname2);
+		cyl->BlackHole();
+		cyl->set_color(0,1,1,0.3); //reddish
+		g4Reco->registerSubsystem(cyl);
+
+		cyl = new PHG4CylinderSubsystem(projname3,0);
+		cyl->set_double_param("length", thinness);
+		cyl->set_double_param("radius", 2); // beampipe needs to fit here
+		cyl->set_double_param("thickness", projradius3); // 
+		cyl->set_string_param("material", "G4_AIR");
+		cyl->set_double_param("place_z", projzpos3);
+		cyl->SetActive(1);
+		cyl->SuperDetector(projname3);
+		cyl->BlackHole();
+		cyl->set_color(0,1,1,0.3); //reddish
+		g4Reco->registerSubsystem(cyl);
+
+	}
 	#ifdef _SIVTX_
 	//---------------------------
 	// Vertexing
@@ -322,7 +376,7 @@ void Fun4All_G4_HybridGEM(
 	// Black hole to suck loopers out of their misery
 	#ifdef _BLACKHOLE_
 	//Full Wrap single Cylinder
-	wrap_with_cylindrical_blackhole(g4Reco,260,-199,321,true);
+	wrap_with_cylindrical_blackhole(g4Reco,250,-250,350,true);
 	#endif
 
 	#ifdef _RICH_
@@ -499,11 +553,13 @@ lter acceptance
 	    MakeGEM(Params, fgt);
 	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
-	   
+
+
 	    //Far Electron Side GEM disk
 	    Params = FullGEMParameters(-1900, 1.0, 110, 18);
 	    MakeGEM(Params, fgt);
 		
+				
         
 	}
           g4Reco->registerSubsystem(fgt);
@@ -680,6 +736,14 @@ lter acceptance
 			 1,				// efficiency (fraction)
 			 0);				// hit noise
 	#endif
+	
+	if(do_projections){
+		//NOTE: The output is in cm
+		kalman->add_cylinder_state(projname1, projradius1);     // projection on cylinder (DIRC)
+		kalman->add_zplane_state  (projname2, projzpos2  );     // projection on vertical planes
+		kalman->add_zplane_state  (projname3, projzpos3  );     // projection on vertical planes
+	}
+	
 	//kalman->Verbosity(10);
 	kalman->set_use_vertex_in_fitting(false);
 	kalman->set_vertex_xy_resolution(0);
@@ -693,6 +757,11 @@ lter acceptance
 
 	PHG4TrackFastSimEval *fast_sim_eval = new PHG4TrackFastSimEval("FastTrackingEval");
 	fast_sim_eval->set_filename(outputFile);
+	if(do_projections){
+		fast_sim_eval->AddProjection(projname1);
+		fast_sim_eval->AddProjection(projname2);
+		fast_sim_eval->AddProjection(projname3);
+	}
 	se->registerSubsystem(fast_sim_eval);
         //se->registerSubsystem(new TrackFastSimEval());
 
