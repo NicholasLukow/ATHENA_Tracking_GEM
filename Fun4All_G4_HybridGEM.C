@@ -147,8 +147,8 @@ void Fun4All_G4_HybridGEM(
 	double thinness    = 0.1;               // black hole thickness, needs to be taken into account for the z positions
 	// ---
 	string projname2   = "FOR";             // Forward plane object name
-	double projzpos2   = 315+thinness/2.;   // [cm]
-	double projradius2 = 210.;               // [cm]
+	double projzpos2   = 145+thinness/2;//315+thinness/2.;   // [cm]
+	double projradius2 = 110;//210.;               // [cm]
 	// ---
 	string projname3   = "BACK";            // Backward plane object name
 	double projzpos3   = -(195+thinness/2.);// [cm]
@@ -157,8 +157,8 @@ void Fun4All_G4_HybridGEM(
 	// Make the Server
 	Fun4AllServer *se = Fun4AllServer::instance();
 	// If you want to fix the random seed for reproducibility
-	 recoConsts *rc = recoConsts::instance();
-	 rc->set_IntFlag("RANDOMSEED", 12345);
+	 //recoConsts *rc = recoConsts::instance();
+	 //rc->set_IntFlag("RANDOMSEED", 12345);
 	// ======================================================================================================
 	// Particle Generator Setup
 	PHG4ParticleGenerator *gen = new PHG4ParticleGenerator();
@@ -528,21 +528,21 @@ lter acceptance
 	    //array<double,6> Params = FullGEMParameters(1082.5, 0.95, 500, 12); //increased inner radius to account for Berkley Si Disks
 	    array<double,6> Params = FullGEMParameters(1036.25, 0.95, 270, 12);
 	    //array<double,6> Params = FullGEMParameters(1300, 1.05, 140, 12);
-	    MakeGEM(Params, fgt);
+	    //MakeGEM(Params, fgt);
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt);
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
-	    MakeGEM(Params, fgt);
+	    //MakeGEM(Params, fgt);
 		
 	    //Electron Endcap GEM Disks
 	    //Params = FullGEMParameters(-1082.5, 0.95, 500, 12); //increased inner radius to account for Berkley Si Disks (this only covers 0.95-1.53 in eta)
 	    Params = FullGEMParameters(-1036.25, 0.95, 270, 12);
 	    //Params = FullGEMParameters(-1300, 1.05, 100, 12);
-	    MakeGEM(Params, fgt);
+	    //MakeGEM(Params, fgt);
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
-	    MakeGEM(Params, fgt); 
+	    //MakeGEM(Params, fgt); 
 
 	    //cout << "Endcap Parameters:" << endl;
 	    //cout << "Top Width: " << Params[2] << endl;
