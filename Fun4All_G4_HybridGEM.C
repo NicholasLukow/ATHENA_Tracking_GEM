@@ -122,6 +122,7 @@ void Fun4All_G4_HybridGEM(
 			double etamin = -3.5,
 			double etamax = 3.5,
 			int magnetic_field = 5, 		// Magnetic field setting
+			int generatorVersion = 5, 		// Generator setting
 			TString out_name = "TEST")	// output filename
 {	
 	// ======================================================================================================
@@ -132,7 +133,7 @@ void Fun4All_G4_HybridGEM(
   gSystem->Load("libg4example01detector.so");
   gSystem->Load("libg4trackfastsim.so");
 	// Input from the user
-	const int particle_gen = 1;     // 1 = particle generator, 2 = particle gun, 3 = simple event generator, 4 = pythia8 e+p collision, 5 = particle generator flat in pT
+	const int particle_gen = generatorVersion;     // 1 = particle generator, 2 = particle gun, 3 = simple event generator, 4 = pythia8 e+p collision, 5 = particle generator flat in pT
 	double pix_size_vtx = 10.; // um - size of pixels in vertexing layers
 	double pix_size_bar = 10.; // um - size of pixels in barrel layers
 	double pix_size_dis = 10.; // um - size of pixels in disk layers
@@ -528,21 +529,21 @@ lter acceptance
 	    //array<double,6> Params = FullGEMParameters(1082.5, 0.95, 500, 12); //increased inner radius to account for Berkley Si Disks
 	    array<double,6> Params = FullGEMParameters(1036.25, 0.95, 270, 12);
 	    //array<double,6> Params = FullGEMParameters(1300, 1.05, 140, 12);
-	    //MakeGEM(Params, fgt);
+	    MakeGEM(Params, fgt);
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt);
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
-	    //MakeGEM(Params, fgt);
+	    MakeGEM(Params, fgt);
 		
 	    //Electron Endcap GEM Disks
 	    //Params = FullGEMParameters(-1082.5, 0.95, 500, 12); //increased inner radius to account for Berkley Si Disks (this only covers 0.95-1.53 in eta)
 	    Params = FullGEMParameters(-1036.25, 0.95, 270, 12);
 	    //Params = FullGEMParameters(-1300, 1.05, 100, 12);
-	    //MakeGEM(Params, fgt);
+	    MakeGEM(Params, fgt);
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
-	    //MakeGEM(Params, fgt); 
+	    MakeGEM(Params, fgt); 
 
 	    //cout << "Endcap Parameters:" << endl;
 	    //cout << "Top Width: " << Params[2] << endl;
@@ -550,9 +551,9 @@ lter acceptance
 
 	    //Far Hadron Side GEM disk
 	    Params = FullGEMParameters(3050, 1.2, 210, 12);
-	    MakeGEM(Params, fgt);
+	    //MakeGEM(Params, fgt);
 	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
-	    MakeGEM(Params, fgt); 
+	    //MakeGEM(Params, fgt); 
 
 
 	    //Far Electron Side GEM disk
