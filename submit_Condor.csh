@@ -31,21 +31,23 @@ set LIMIT = 100
 #Simulation Parameters
 set EVENTS = 5000
 
+#For GEN, 1 = momentum, 5 = pt
+set GEN = 5 
 
 set PMIN = 1
 set PMAX = 30
-set ETAMIN = -3.5
+set ETAMIN = 2.5
 set ETAMAX = 3.5
 set BFIELD = 5
-set NAME = "4BARR"
+set NAME = "NoFarGEMRICHPtForwardOnly"
 
 while ( "$NUMBER" <= "$LIMIT" )
 
-    set LogFile = ${OUTPUT_DIR}/condor/${NAME}.P=${PMIN}-${PMAX}.5kevents.BFIELD=${BFIELD}.ETA=${ETAMIN}-${ETAMAX}_${NUMBER}.out
-    set ErrFile = ${OUTPUT_DIR}/condor/${NAME}.P=${PMIN}-${PMAX}.5kevents.BFIELD=${BFIELD}.ETA=${ETAMIN}-${ETAMAX}_${NUMBER}.err
+    set LogFile = ${OUTPUT_DIR}/condor/${NAME}.GEN=${GEN}.P=${PMIN}-${PMAX}.5kevents.BFIELD=${BFIELD}.ETA=${ETAMIN}-${ETAMAX}_${NUMBER}.out
+    set ErrFile = ${OUTPUT_DIR}/condor/${NAME}.GEN=${GEN}.P=${PMIN}-${PMAX}.5kevents.BFIELD=${BFIELD}.ETA=${ETAMIN}-${ETAMAX}_${NUMBER}.err
 
    
-    set Args = ( $EVENTS $PMIN $PMAX $ETAMIN $ETAMAX $BFIELD $NAME $NUMBER $OUTPUT_DIR $SOURCE_DIR)
+    set Args = ( $EVENTS $PMIN $PMAX $ETAMIN $ETAMAX $GEN $BFIELD $NAME $NUMBER $OUTPUT_DIR $SOURCE_DIR)
     echo "" >> CondorFile
     echo "Output       = ${LogFile}" >> CondorFile
     echo "Error        = ${ErrFile}" >> CondorFile
