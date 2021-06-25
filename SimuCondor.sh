@@ -22,11 +22,12 @@ PMIN=$2
 PMAX=$3
 ETAMIN=$4
 ETAMAX=$5
-BFIELD=$6
-NAME=$7
-number=$8
-BASEDIR=$9
-SOURCE_DIR=$10
+GEN=$6
+BFIELD=$7
+NAME=$8
+number=$9
+BASEDIR=${10}
+SOURCE_DIR=${11}
 
 WRKDIR=${BASEDIR}
 
@@ -34,7 +35,7 @@ WRKDIR=${BASEDIR}
 cd $WRKDIR
 
 # Run Simulation
-root -b -l -q ${BASEDIR}/Fun4All_G4_HybridGEM.C\(${EVENTS},${PMIN},${PMAX},${ETAMIN},${ETAMAX},${BFIELD},\"${NAME}${number}\"\)
+root -b -l -q ${BASEDIR}/Fun4All_G4_HybridGEM.C\(${EVENTS},${PMIN},${PMAX},${ETAMIN},${ETAMAX},${GEN},${BFIELD},\"${NAME}${number}\"\)
 
 date
 echo DONE
