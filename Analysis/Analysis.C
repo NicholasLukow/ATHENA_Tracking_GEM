@@ -330,13 +330,20 @@ void Analysis( int _NEta_ = 1, double EtaMin = 2.5, double EtaMax = 3.5, int _NP
 				TVector3 truthP(gpx, gpy, gpz);
 				TVector3 recoP(px, py, pz);
 
-				//hits and projections 
+				//hits and projections of tracks 
 				TVector3 DIRCPos(DIRC_x, DIRC_y, DIRC_z);
 				TVector3 DIRCProjPos(DIRC_proj_x, DIRC_proj_y, DIRC_proj_z);
 				TVector3 FORPos(FOR_x, FOR_y, FOR_z);
 				TVector3 FORProjPos(FOR_proj_x, FOR_proj_y, FOR_proj_z);
 				TVector3 BACKPos(BACK_x, BACK_y, BACK_z);
 				TVector3 BACKProjPos(BACK_proj_x, BACK_proj_y, BACK_proj_z);
+				//hits and projections of tracks 
+				TVector3 DIRCMom(DIRC_px, DIRC_py, DIRC_pz);
+				TVector3 DIRCProjMom(DIRC_proj_px, DIRC_proj_py, DIRC_proj_pz);
+				TVector3 FORMom(FOR_px, FOR_py, FOR_pz);
+				TVector3 FORProjMom(FOR_proj_px, FOR_proj_py, FOR_proj_pz);
+				TVector3 BACKMom(BACK_px, BACK_py, BACK_pz);
+				TVector3 BACKProjMom(BACK_proj_px, BACK_proj_py, BACK_proj_pz);
 				//Loop over eta as to store information in the properly indexed histogram
 				for (int iEta = 0; iEta < _NEta_; iEta++)
 				{
@@ -362,22 +369,22 @@ void Analysis( int _NEta_ = 1, double EtaMin = 2.5, double EtaMax = 3.5, int _NP
 									if (DIRCPos.Mag() < 17318)
 									{
 										h_DIRCPointRes[iDet][iB][iEta][iP]->Fill(CylS);				
-										h_DIRCThetaRes[iDet][iB][iEta][iP]->Fill(DIRCPos.Theta() - DIRCProjPos.Theta());
-										h_DIRCPhiRes[iDet][iB][iEta][iP]->Fill(dPhi);
+										h_DIRCThetaRes[iDet][iB][iEta][iP]->Fill(DIRCMom.Theta() - DIRCProjMom.Theta());
+										h_DIRCPhiRes[iDet][iB][iEta][iP]->Fill(DIRCMom.Phi() - DIRCProjMom.Phi());
 									}
 		
 									if (FORPos.Mag() < 17318)
 									{
 										h_FORPointRes[iDet][iB][iEta][iP]->Fill( (FORPos-FORProjPos).Mag() );				
-										h_FORThetaRes[iDet][iB][iEta][iP]->Fill(FORPos.Theta() - FORProjPos.Theta());
-										h_FORPhiRes[iDet][iB][iEta][iP]->Fill(FORPos.Phi() - FORProjPos.Phi());
+										h_FORThetaRes[iDet][iB][iEta][iP]->Fill(FORMom.Theta() - FORProjMom.Theta());
+										h_FORPhiRes[iDet][iB][iEta][iP]->Fill(FORMom.Phi() - FORProjMom.Phi());
 									}
 									
 									if (BACKPos.Mag() < 17318)
 									{
 										h_BACKPointRes[iDet][iB][iEta][iP]->Fill( (BACKPos-BACKProjPos).Mag() );
-										h_BACKThetaRes[iDet][iB][iEta][iP]->Fill(BACKPos.Theta() - BACKProjPos.Theta());
-										h_BACKPhiRes[iDet][iB][iEta][iP]->Fill(BACKPos.Phi() - BACKProjPos.Phi());
+										h_BACKThetaRes[iDet][iB][iEta][iP]->Fill(BACKMom.Theta() - BACKProjMom.Theta());
+										h_BACKPhiRes[iDet][iB][iEta][iP]->Fill(BACKMom.Phi() - BACKProjMom.Phi());
 									}	
 									
 
