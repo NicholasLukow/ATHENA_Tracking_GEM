@@ -9,11 +9,11 @@
 //Here are the only parameters that need changing for most analyses (others are changed in the arguments given... See shell script)
 //The following parts correspond to the different simulations you have run and want to process data for
 //Give the number of detector configurations as well as the name used to identify it in the rootfile name and a longer description for labels
-#define _NDet_ 2
+#define _NDet_ 4
 //std::string DetVers[_NDet_] = {"Nominal", "NoGems" , "NoEndcapGem", "OneEndcapGem", "TwoEndcapGem", "NoFarGem"};
 //const char *DetectorFullName[_NDet_] = {"Nominal Hybrid", "No GEM Disks", "No Endcap GEM Disks", "One Endcap GEM Disk", "Two Endcap GEM Disks", "Only Endcap GEM Disks"};
-std::string DetVers[_NDet_] = { "OneEndCapNom", "ProjTest"};
-const char *DetectorFullName[_NDet_] = {"New Nominal", "Test"};
+std::string DetVers[_NDet_] = { "Nominal3Endcap", "Nominal1Endcap","NoFar3Endcap", "NoFar1Endcap"};
+const char *DetectorFullName[_NDet_] = {"3 Endcap GEM Disk", "1 Endcap GEM Disk", "3 Endcap GEM Disks, No Far GEM Disks", "1 Endcap GEM Disk, No Far GEM Disks"};
 
 //Give the number of field maps as well as the name used to identify it in the rootfile name and a longer description for labels
 #define _NBField_ 1
@@ -30,7 +30,7 @@ double ymax =  3.5;
 //---------------------------------------------------------------------------------------------------------------------------------------  
 
 
-void Analysis( int _NEta_ = 1, double EtaMin = 2.5, double EtaMax = 3.5, int _NP_ = 29, double PMin = 1, double PMax =30, int _PT_ = 0, int _NY_ = 0, int _PROJ_ = 0, int _PVAR_ = 1, int _DRAWFITS_ = 0, int _DRAWPWGReq_ = 0 )
+void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ = 29, double PMin = 1, double PMax =30, int _PT_ = 0, int _NY_ = 0, int _PROJ_ = 0, int _PVAR_ = 1, int _DRAWFITS_ = 0, int _DRAWPWGReq_ = 0 )
 {
 
 	//defining some variables/arrays
@@ -896,6 +896,69 @@ void Analysis( int _NEta_ = 1, double EtaMin = 2.5, double EtaMax = 3.5, int _NP
 	c1->Write();
 	Plotoutfile.Close();
 	c1->SaveAs(Form("./Plots/cPlot_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf.pdf", PMin, PMax, EtaMin, EtaMax));
+
+	
+
+
+	//Saving the individual fits to a pdf so they can be easily investigated in case of issues
+
+	TFile *FitInFile = new TFile("./Output/Fits.root", "read");
+	TCanvas *cPS = new TCanvas("cPS", "", 100, 100, 600, 800);
+
+
+	for (int iD = 0; iD < _NDet_; iD++)
+	{
+		for (int iB = 0; iB < _NBField_; iB++) 
+		{
+			TString SetupName = Form("%s_%s", DetVers[iD].c_str(), BField[iB].c_str());
+			TPDF *ps = new TPDF(Form("./Plots/FittedHistograms_%s.pdf", SetupName.Data()));
+			cPS->Clear();
+			cPS->Divide(2,3);
+			int padIndex = 1;
+			
+		  	for (int iP = 0; iP < _NP_; iP++)
+			{
+				for (int iA = 0; iA < _NEta_; iA++)
+		        	{
+					if (padIndex > 6)
+					{
+						cPS->Clear();
+						cPS->Divide(2,3);
+						padIndex = 1;
+					}
+		        		//Construct Histo Name
+					TString HistName;
+					if(_NY_ == 0)
+					{
+						if (_PT_) HistName = Form("h_ptRes_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+						else HistName = Form("h_momRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+					}
+					else if (_NY_ == 1)
+					{
+						if (_PT_) HistName = Form("h_dca2dpt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+						else HistName = Form("h_dca2d_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+					}  
+					else if (_NY_ == 3)
+					{
+						if (_PT_) HistName = Form("h_%s%sRes_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",ProjectionLocation[_PROJ_].c_str(),ProjectionVariable[_PVAR_].c_str(), DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+						else HistName = Form("h_%s%sRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",ProjectionLocation[_PROJ_].c_str(),ProjectionVariable[_PVAR_].c_str(), DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+					} 	
+					//Get Histogram
+		        		TH1D *Htmp = (TH1D*)FitInFile->Get(HistName);
+					cPS->cd(padIndex);
+					Htmp->Draw();
+					cPS->Update();
+					padIndex++;
+								
+				
+				}
+			}
+			ps->Close();
+		}
+	}
+
+
+
 
 	cout << "DONE!" << endl;
 	return;
