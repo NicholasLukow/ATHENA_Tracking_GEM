@@ -33,6 +33,8 @@
 #include <g4lblvtx/EicFRichSubsystem.h>
 #include "G4_BlackHole.C"
 
+#include "G4_DIRC_SMALL.C"
+
 #ifdef _EICTOYVST_
 #include <EicRootVstSubsystem.h>
 #include <EtmOrphans.h>
@@ -121,8 +123,8 @@ void Fun4All_G4_HybridGEM(
 			double pmax = 30., 			// GeV/c
 			double etamin = -3.5,
 			double etamax = 3.5,
-			int magnetic_field = 5, 		// Magnetic field setting
 			int generatorVersion = 5, 		// Generator setting
+			int magnetic_field = 5, 		// Magnetic field setting
 			TString out_name = "TEST")	// output filename
 {	
 	// ======================================================================================================
@@ -270,6 +272,13 @@ void Fun4All_G4_HybridGEM(
 		g4Reco->registerSubsystem(cyl);
 
 	}
+
+	#ifdef _DIRC_
+	
+	DIRCSetup(g4Reco);
+
+	#endif
+
 	#ifdef _SIVTX_
 	//---------------------------
 	// Vertexing
