@@ -138,18 +138,18 @@ void Fun4All_G4_HybridGEM(
 	double pix_size_bar = 10.; // um - size of pixels in barrel layers
 	double pix_size_dis = 10.; // um - size of pixels in disk layers
 	const int nDisks_per_side = 5;
-	const int do_projections = 1;
+	const int do_projections =  1;
 	// Parameters for projections
 	string projname1   = "DIRC";            // Cylindrical surface object name
-	double projradius1 = 112;// 80.;               // [cm] 
+	double projradius1 = 84;//112;// 80.;               // [cm] 
 	//NOTE: these surfaces are black holes. Care must be taken in the choice of dimensions as to not absorb particles within the acceptance of other detectors
 	double length1     = 230; //200.;              // [cm]
 	// ---
-	double thinness    = 0.1;               // black hole thickness, needs to be taken into account for the z positions
+	double thinness    = 0.01;               // black hole thickness, needs to be taken into account for the z positions
 	// ---
 	string projname2   = "FOR";             // Forward plane object name
-	double projzpos2   = 145+thinness/2;//315+thinness/2.;   // [cm]
-	double projradius2 = 110;//210.;               // [cm]
+	double projzpos2   = 225+thinness/2;//315+thinness/2.;   // [cm]
+	double projradius2 = 147;//210.;               // [cm]
 	// ---
 	string projname3   = "BACK";            // Backward plane object name
 	double projzpos3   = -(195+thinness/2.);// [cm]
@@ -235,7 +235,8 @@ void Fun4All_G4_HybridGEM(
 		cyl->set_double_param("length", length1);
 		cyl->set_double_param("radius", projradius1); // dirc radius
 		cyl->set_double_param("thickness", 0.1); // needs some thickness
-		cyl->set_string_param("material", "G4_AIR");
+		//cyl->set_string_param("material", "G4_AIR");
+		cyl->set_string_param("material", "G4_Galactic");
 		cyl->SetActive(1);
 		cyl->SuperDetector(projname1);
 		cyl->BlackHole();
@@ -246,7 +247,8 @@ void Fun4All_G4_HybridGEM(
 		cyl->set_double_param("length", thinness);
 		cyl->set_double_param("radius", 2); // beampipe needs to fit here
 		cyl->set_double_param("thickness", projradius2); // 
-		cyl->set_string_param("material", "G4_AIR");
+		//cyl->set_string_param("material", "G4_AIR");
+		cyl->set_string_param("material", "G4_Galactic");
 		cyl->set_double_param("place_z", projzpos2);
 		cyl->SetActive(1);
 		cyl->SuperDetector(projname2);
@@ -258,7 +260,8 @@ void Fun4All_G4_HybridGEM(
 		cyl->set_double_param("length", thinness);
 		cyl->set_double_param("radius", 2); // beampipe needs to fit here
 		cyl->set_double_param("thickness", projradius3); // 
-		cyl->set_string_param("material", "G4_AIR");
+		//cyl->set_string_param("material", "G4_AIR");
+		cyl->set_string_param("material", "G4_Galactic");
 		cyl->set_double_param("place_z", projzpos3);
 		cyl->SetActive(1);
 		cyl->SuperDetector(projname3);
@@ -529,21 +532,22 @@ lter acceptance
 	    //array<double,6> Params = FullGEMParameters(1082.5, 0.95, 500, 12); //increased inner radius to account for Berkley Si Disks
 	    array<double,6> Params = FullGEMParameters(1036.25, 0.95, 270, 12);
 	    //array<double,6> Params = FullGEMParameters(1300, 1.05, 140, 12);
-	    MakeGEM(Params, fgt);
+	    //MakeGEM(Params, fgt);
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
-	    MakeGEM(Params, fgt);
+	    //MakeGEM(Params, fgt);
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
-	    MakeGEM(Params, fgt);
+	    //MakeGEM(Params, fgt);
+	    
 		
 	    //Electron Endcap GEM Disks
 	    //Params = FullGEMParameters(-1082.5, 0.95, 500, 12); //increased inner radius to account for Berkley Si Disks (this only covers 0.95-1.53 in eta)
 	    Params = FullGEMParameters(-1036.25, 0.95, 270, 12);
 	    //Params = FullGEMParameters(-1300, 1.05, 100, 12);
-	    MakeGEM(Params, fgt);
+	    //MakeGEM(Params, fgt);
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
-	    MakeGEM(Params, fgt); 
+	    //MakeGEM(Params, fgt); 
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
-	    MakeGEM(Params, fgt); 
+	    //MakeGEM(Params, fgt); 
 
 	    //cout << "Endcap Parameters:" << endl;
 	    //cout << "Top Width: " << Params[2] << endl;
@@ -551,9 +555,9 @@ lter acceptance
 
 	    //Far Hadron Side GEM disk
 	    Params = FullGEMParameters(3050, 1.2, 210, 12);
-	    //MakeGEM(Params, fgt);
+	    MakeGEM(Params, fgt);
 	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
-	    //MakeGEM(Params, fgt); 
+	    MakeGEM(Params, fgt); 
 
 
 	    //Far Electron Side GEM disk
