@@ -71,6 +71,7 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 	TH2D *h_nHits_momBin[_NDet_][_NBField_][_NEta_][_NP_], *h_nHits_ptBin[_NDet_][_NBField_][_NEta_][_NP_];
 
 	TH1D *h_dca2d[_NDet_][_NBField_][_NEta_][_NP_], *h_dca2dpt[_NDet_][_NBField_][_NEta_][_NP_]; 
+	TH1D *h_dcaZ[_NDet_][_NBField_][_NEta_][_NP_], *h_dcaZpt[_NDet_][_NBField_][_NEta_][_NP_]; 
 	
 	TH1D *h_DIRCPointRes[_NDet_][_NBField_][_NEta_][_NP_], *h_DIRCPointRespt[_NDet_][_NBField_][_NEta_][_NP_];	
 	TH1D *h_DIRCThetaRes[_NDet_][_NBField_][_NEta_][_NP_], *h_DIRCThetaRespt[_NDet_][_NBField_][_NEta_][_NP_];	
@@ -100,6 +101,8 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 
 					h_dca2d[iDet][iB][iEta][iP] = new TH1D(Form("h_dca2d_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA2D for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -0.1, 0.1);
 					h_dca2dpt[iDet][iB][iEta][iP] = new TH1D(Form("h_dca2dpt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA2D for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -0.1, 0.1);
+					h_dcaZ[iDet][iB][iEta][iP] = new TH1D(Form("h_dcaZ_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA_z for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -0.1, 0.1);
+					h_dcaZpt[iDet][iB][iEta][iP] = new TH1D(Form("h_dcaZpt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA_z for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -0.1, 0.1);
 					
 					double PHIRANGE = 0.01;
 					double THETARANGE = 0.01;
@@ -397,6 +400,7 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 								
 									eff[iDet][iB][iEta][iP] += 1;	
 									h_dca2d[iDet][iB][iEta][iP]->Fill(dca2d);
+									h_dcaZ[iDet][iB][iEta][iP]->Fill(pcaz);
 								
 								}
 							}
@@ -445,6 +449,7 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 									
 									effpt[iDet][iB][iEta][iP] += 1;	
 									h_dca2dpt[iDet][iB][iEta][iP]->Fill(dca2d);
+									h_dcaZpt[iDet][iB][iEta][iP]->Fill(pcaz);
 								}
 
 							}
@@ -468,6 +473,8 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 
 					h_dca2d[iDet][iB][iEta][iP]->Write();
 					h_dca2dpt[iDet][iB][iEta][iP]->Write();
+					h_dcaZ[iDet][iB][iEta][iP]->Write();
+					h_dcaZpt[iDet][iB][iEta][iP]->Write();
 					
 					h_DIRCPointRes[iDet][iB][iEta][iP]->Write();
 					h_DIRCPointRespt[iDet][iB][iEta][iP]->Write();
@@ -560,6 +567,11 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 							if (_PT_) HistName = Form("h_%s%sRes_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",ProjectionLocation[_PROJ_].c_str(),ProjectionVariable[_PVAR_].c_str(), DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
 							else HistName = Form("h_%s%sRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",ProjectionLocation[_PROJ_].c_str(),ProjectionVariable[_PVAR_].c_str(), DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
 						} 	
+						else if (_NY_ == 4)
+						{
+							if (_PT_) HistName = Form("h_dcaZpt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+							else HistName = Form("h_dcaZ_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+						}  
 						//Get Histogram
 		        		//cout << "Getting: " << HistName << endl;
 		        		TH1D *Htmp = (TH1D*)histoFile->Get(HistName);
@@ -711,6 +723,12 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 						res[index] = 1000*Resolution[iA][iP][iD][iB];
 	   	  	  	  		reserr[index] = 1000*ResErr[iA][iP][iD][iB];
 					}
+					else if (_NY_ == 4)
+					{
+						//convert from cm to um
+						res[index] = 10000*Resolution[iA][iP][iD][iB];
+	   	  	  	  		reserr[index] = 10000*ResErr[iA][iP][iD][iB];
+					}
 					else {cout << "No valid plotting variable chosen" << endl; break;}
 					if ( res[index] > ymax) ymax = res[index];
 				  	index++;
@@ -784,6 +802,10 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 	{
 		hdum->GetYaxis()->SetTitle(Form( "%s Resolution [mRad]" ,VariableFullName[_PVAR_].c_str()));
 	}
+    else if (_NY_ == 4)
+    {
+    	hdum->GetYaxis()->SetTitle("#sigma_{DCA_{z}} [#mum]");
+    }
 
     hdum->GetYaxis()->SetTitleSize(0.06);
     hdum->GetYaxis()->SetLabelSize(0.05);
@@ -816,6 +838,12 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 	if (_NDIM_ == 0) hdum->SetTitle(Form( "%s Resolution for %s for tracks with %0.2lf < #eta < %0.2lf",VariableFullName[_PVAR_].c_str(), LocationFullName[_PROJ_].c_str(), EtaMin, EtaMax));
 	if (_NDIM_ == 1 && !_PT_) hdum->SetTitle(Form( "%s Resolution for %s for tracks with %0.2lf < p < %0.2lf", VariableFullName[_PVAR_].c_str(), LocationFullName[_PROJ_].c_str(), PMin, PMax));
 	if (_NDIM_ == 1 && _PT_) hdum->SetTitle(Form( "%s Resoltuoin for %s for tracks with %0.2lf < p_T < %0.2lf", VariableFullName[_PVAR_].c_str(), LocationFullName[_PROJ_].c_str(), PMin, PMax));
+    }
+    else if (_NY_ == 4 )
+    {
+	if (_NDIM_ == 0) hdum->SetTitle(Form( "DCA_z for tracks with %0.2lf < #eta < %0.2lf", EtaMin, EtaMax));
+	if (_NDIM_ == 1 && !_PT_) hdum->SetTitle(Form( "DCA_z for tracks with %0.2lf < p < %0.2lf", PMin, PMax));
+	if (_NDIM_ == 1 && _PT_) hdum->SetTitle(Form( "DCA_z for tracks with %0.2lf < p_T < %0.2lf", PMin, PMax));
     }
 
 
@@ -943,6 +971,11 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 						if (_PT_) HistName = Form("h_%s%sRes_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",ProjectionLocation[_PROJ_].c_str(),ProjectionVariable[_PVAR_].c_str(), DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
 						else HistName = Form("h_%s%sRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",ProjectionLocation[_PROJ_].c_str(),ProjectionVariable[_PVAR_].c_str(), DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
 					} 	
+					else if (_NY_ == 4)
+					{
+						if (_PT_) HistName = Form("h_dcaZpt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+						else HistName = Form("h_dcaZ_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+					}  
 					//Get Histogram
 		        		TH1D *Htmp = (TH1D*)FitInFile->Get(HistName);
 					cPS->cd(padIndex);
