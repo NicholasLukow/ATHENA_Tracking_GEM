@@ -148,8 +148,8 @@ void Fun4All_G4_HybridGEM(
 	double thinness    = 0.01;               // black hole thickness, needs to be taken into account for the z positions
 	// ---
 	string projname2   = "FOR";             // Forward plane object name
-	double projzpos2   = 225+thinness/2;//315+thinness/2.;   // [cm]
-	double projradius2 = 147;//210.;               // [cm]
+	double projzpos2   = 220+thinness/2;//315+thinness/2.;   // [cm]
+	double projradius2 = 145;//210.;               // [cm]
 	// ---
 	string projname3   = "BACK";            // Backward plane object name
 	double projzpos3   = -(195+thinness/2.);// [cm]
@@ -207,11 +207,11 @@ void Fun4All_G4_HybridGEM(
 		g4Reco->set_field_map(string(getenv("CALIBRATIONROOT")) + string("/Field/Map/mfield.4col.dat"), PHFieldConfig::kFieldBeast);
 	}
 	else if(magnetic_field==5){     // ATHENA 3.0T map (updated BeAST Field map with dual coil configuration)
-		B_label = "_ATHENA";
+		B_label = "_ATHENA0528";
 		g4Reco->set_field_map( string("../BeastMagneticField/data/EIC_v.0.1.0_Magnetic_Field_Map_2021_05_28_radial_coords_[cm]_[T].401301.line.Bmap"), PHFieldConfig::kFieldBeast);
 	}
 	else if(magnetic_field==6){     // updated BeAST 3.0T map
-		B_label = "_NewBeAST";
+		B_label = "_ATHENA0507";
 		g4Reco->set_field_map( string("../BeastMagneticField/data/EIC_Magnetic_Field_Map_2021_05_07_radial_coords_[cm]_[T].120000.lines.Bmap"), PHFieldConfig::kFieldBeast);
 	}
 	else{                           // The user did not provide a valid B field setting
@@ -402,7 +402,7 @@ void Fun4All_G4_HybridGEM(
 	double be_pipe_center = 0.5 * (be_pipe_length_plus + be_pipe_length_neg);
 
 	double au_layer_radius = be_pipe_thickness+be_pipe_radius;
-	double au_layer_thickness = 0.0010; //10 um
+	double au_layer_thickness = 0.0002; //2 um
 	double au_layer_length = be_pipe_length;
 	double au_layer_center = be_pipe_center;
 
