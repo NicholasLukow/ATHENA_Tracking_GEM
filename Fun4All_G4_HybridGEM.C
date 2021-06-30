@@ -33,6 +33,8 @@
 #include <g4lblvtx/EicFRichSubsystem.h>
 #include "G4_BlackHole.C"
 
+#include "G4_Pipe_EIC.C"
+
 #include "G4_DIRC_SMALL.C"
 
 #ifdef _EICTOYVST_
@@ -41,13 +43,11 @@
 #endif
 
 
-#ifdef _USE_FORWARD_PIPES_
 //gdml
 #include <gdmlimporter/GdmlImportDetectorSubsystem.h>
 #include <gdmlimporter/SimpleNtuple.h>
 #include <gdmlimporter/TrackFastSimEval.h>
 #include <g4detectors/PHG4GDMLSubsystem.h>
-#endif
 
 #ifdef _GEMS_
 #include "G4_GEM_EIC_v1.C"
@@ -143,7 +143,7 @@ void Fun4All_G4_HybridGEM(
 	const int do_projections =  1;
 	// Parameters for projections
 	string projname1   = "DIRC";            // Cylindrical surface object name
-	double projradius1 = 84;//112;// 80.;               // [cm] 
+	double projradius1 = 80;//112;// 80.;               // [cm] 
 	//NOTE: these surfaces are black holes. Care must be taken in the choice of dimensions as to not absorb particles within the acceptance of other detectors
 	double length1     = 230; //200.;              // [cm]
 	// ---
@@ -241,7 +241,6 @@ void Fun4All_G4_HybridGEM(
 		cyl->set_string_param("material", "G4_Galactic");
 		cyl->SetActive(1);
 		cyl->SuperDetector(projname1);
-		cyl->BlackHole();
 		cyl->set_color(1,0,0,0.7); //reddish
 		g4Reco->registerSubsystem(cyl);
 
@@ -254,7 +253,6 @@ void Fun4All_G4_HybridGEM(
 		cyl->set_double_param("place_z", projzpos2);
 		cyl->SetActive(1);
 		cyl->SuperDetector(projname2);
-		cyl->BlackHole();
 		cyl->set_color(0,1,1,0.3); //reddish
 		g4Reco->registerSubsystem(cyl);
 
@@ -267,7 +265,6 @@ void Fun4All_G4_HybridGEM(
 		cyl->set_double_param("place_z", projzpos3);
 		cyl->SetActive(1);
 		cyl->SuperDetector(projname3);
-		cyl->BlackHole();
 		cyl->set_color(0,1,1,0.3); //reddish
 		g4Reco->registerSubsystem(cyl);
 
@@ -338,7 +335,7 @@ void Fun4All_G4_HybridGEM(
   	const int nDisks = sizeof(si_z_pos)/sizeof(*si_z_pos);
   	double si_r_max[] = {19.0, 19.0, 19.0, 19.0, 7.13, 7.13, 19.0, 19.0, 19.0, 19.0};
   	double si_r_min[] = {7.93, 7.25, 4.65, 3.64, 3.64, 3.64, 3.64, 4.65, 7.25, 9.93};
-  	double si_thick_disk = 0.25/100.*9.37;
+  	double si_thick_disk = 0.24/100.*9.37;
 
  	for (int ilayer = 0; ilayer < nDisks ; ilayer++){
  		cyl = new PHG4CylinderSubsystem("FBVS", ilayer);
@@ -399,78 +396,14 @@ void Fun4All_G4_HybridGEM(
 	
 	#endif
 
-	
+	//beampipe as implemented by Rey with slight modification
 	#ifdef _BEAMPIPE_
-	//---------------------------
-	// mid-rapidity beryllium pipe
-	double be_pipe_radius = 3.1000;
-	double be_pipe_thickness = 3.1762 - be_pipe_radius;  // 760 um for sPHENIX
-	double be_pipe_length_plus = 66.8;                   // +z beam pipe extend.
-	double be_pipe_length_neg = -79.8;                   // -z beam pipe extend.
-	double be_pipe_length = be_pipe_length_plus - be_pipe_length_neg;
-	double be_pipe_center = 0.5 * (be_pipe_length_plus + be_pipe_length_neg);
-
-	double au_layer_radius = be_pipe_thickness+be_pipe_radius;
-	double au_layer_thickness = 0.0002; //2 um
-	double au_layer_length = be_pipe_length;
-	double au_layer_center = be_pipe_center;
-
-
-	cyl = new PHG4CylinderSubsystem("BE_PIPE", 1);
-	cyl->set_double_param("radius", be_pipe_radius);
-	cyl->set_int_param("lengthviarapidity", 0);
-	cyl->set_double_param("length", be_pipe_length);
-	cyl->set_double_param("place_z", be_pipe_center);
-	cyl->set_string_param("material", "G4_Be");
-	cyl->set_double_param("thickness", be_pipe_thickness);
-	cyl->SuperDetector("PIPE");
-	g4Reco->registerSubsystem(cyl);
-	
-	cyl = new PHG4CylinderSubsystem("BE_PIPE", 2);
-	cyl->set_double_param("radius", au_layer_radius);
-	cyl->set_int_param("lengthviarapidity", 0);
-	cyl->set_double_param("length", au_layer_length);
-	cyl->set_double_param("place_z", au_layer_center);
-	cyl->set_string_param("material", "G4_Au");
-	cyl->set_double_param("thickness", au_layer_thickness);
-	cyl->SuperDetector("PIPE");
-	g4Reco->registerSubsystem(cyl);
-
-	//---------------------------
-       #endif 
-
-        // process pipe extentions?                                                                                                                   
-        bool use_forward_pipes = false;
-        #ifdef _USE_FORWARD_PIPES_
-
-        use_forward_pipes = true;
-        #endif
-        const bool do_pipe_hadron_forward_extension = use_forward_pipes && true;
-        const bool do_pipe_electron_forward_extension = use_forward_pipes && true;
-
-	#ifdef _USE_FORWARD_PIPES_
-	if (do_pipe_electron_forward_extension)
-        {
-        PHG4GDMLSubsystem* gdml = new PHG4GDMLSubsystem("ElectronForwardEnvelope");
-        //GdmlImportDetectorSubsystem* gdml = new GdmlImportDetectorSubsystem("ElectronForwardEnvelope");
-        gdml->set_string_param("GDMPath", string(getenv("CALIBRATIONROOT")) + "/Beam/Detector chamber 3-20-20.G4Import.gdml");
-        gdml->set_string_param("TopVolName", "ElectronForwardEnvelope");
-        gdml->set_int_param("skip_DST_geometry_export", 1);  // do not export extended beam pipe as it is not supported by TGeo and outside Kalman filter acceptance                                                                                                                                       
-        gdml->OverlapCheck(1);
-        g4Reco->registerSubsystem(gdml);
-        }
-	if (do_pipe_hadron_forward_extension)
-        {
-        PHG4GDMLSubsystem* gdml = new PHG4GDMLSubsystem("HadronForwardEnvelope");
-        //GdmlImportDetectorSubsystem* gdml = new GdmlImportDetectorSubsystem("HadronForwardEnvelope");
-        gdml->set_string_param("GDMPath", string(getenv("CALIBRATIONROOT")) + "/Beam/Detector chamber 3-20-20.G4Import.gdml");
-        gdml->set_string_param("TopVolName", "HadronForwardEnvelope");
-        gdml->set_int_param("skip_DST_geometry_export", 1);  // do not export extended beam pipe as it is not supported by TGeo and outside Kalman fi\
-lter acceptance                                                                                                                                       
-        gdml->OverlapCheck(1);
-        g4Reco->registerSubsystem(gdml);
-        }
+	PipeInit();
+	double pipe_radius=0;	
+	pipe_radius = Pipe(g4Reco, pipe_radius , true);	
 	#endif
+
+
 	// ------------
         #ifdef _MPGD_
         double gap_betweenCZ = 1.5, Gap_betweenlayer = 1.5;
