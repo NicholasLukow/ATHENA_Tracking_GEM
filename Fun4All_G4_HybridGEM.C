@@ -143,19 +143,23 @@ void Fun4All_G4_HybridGEM(
 	const int do_projections =  1;
 	// Parameters for projections
 	string projname1   = "DIRC";            // Cylindrical surface object name
-	double projradius1 = 80;//112;// 80.;               // [cm] 
+	double projradius1 = 82;//112;// 80.;               // [cm] 
 	//NOTE: these surfaces are black holes. Care must be taken in the choice of dimensions as to not absorb particles within the acceptance of other detectors
-	double length1     = 230; //200.;              // [cm]
+	double length1     = 290; //200.;              // [cm]
 	// ---
 	double thinness    = 0.01;               // black hole thickness, needs to be taken into account for the z positions
 	// ---
 	string projname2   = "FOR";             // Forward plane object name
 	double projzpos2   = 220+thinness/2;//315+thinness/2.;   // [cm]
-	double projradius2 = 145;//210.;               // [cm]
+	double projradius2 = 146;//210.;               // [cm]
 	// ---
 	string projname3   = "BACK";            // Backward plane object name
-	double projzpos3   = -(195+thinness/2.);// [cm]
-	double projradius3 = 170.;               // [cm]
+	double projzpos3   = -(138+thinness/2.);// [cm]
+	double projradius3 = 130.;               // [cm]
+	// ---
+	string projname4   = "MIDRICH";            // Backward plane object name
+	double projzpos4   = 130;// [cm]
+	double projradius4 = 100.;               // [cm]
 	// ======================================================================================================
 	// Make the Server
 	Fun4AllServer *se = Fun4AllServer::instance();
@@ -237,8 +241,8 @@ void Fun4All_G4_HybridGEM(
 		cyl->set_double_param("length", length1);
 		cyl->set_double_param("radius", projradius1); // dirc radius
 		cyl->set_double_param("thickness", 0.1); // needs some thickness
-		//cyl->set_string_param("material", "G4_AIR");
-		cyl->set_string_param("material", "G4_Galactic");
+		cyl->set_string_param("material", "G4_AIR");
+		//cyl->set_string_param("material", "G4_Galactic");
 		cyl->SetActive(1);
 		cyl->SuperDetector(projname1);
 		cyl->set_color(1,0,0,0.7); //reddish
@@ -248,24 +252,36 @@ void Fun4All_G4_HybridGEM(
 		cyl->set_double_param("length", thinness);
 		cyl->set_double_param("radius", 2); // beampipe needs to fit here
 		cyl->set_double_param("thickness", projradius2); // 
-		//cyl->set_string_param("material", "G4_AIR");
-		cyl->set_string_param("material", "G4_Galactic");
+		cyl->set_string_param("material", "G4_AIR");
+		//cyl->set_string_param("material", "G4_Galactic");
 		cyl->set_double_param("place_z", projzpos2);
 		cyl->SetActive(1);
 		cyl->SuperDetector(projname2);
-		cyl->set_color(0,1,1,0.3); //reddish
+		cyl->set_color(0,1,1,0.3); 
 		g4Reco->registerSubsystem(cyl);
 
 		cyl = new PHG4CylinderSubsystem(projname3,0);
 		cyl->set_double_param("length", thinness);
 		cyl->set_double_param("radius", 2); // beampipe needs to fit here
 		cyl->set_double_param("thickness", projradius3); // 
-		//cyl->set_string_param("material", "G4_AIR");
-		cyl->set_string_param("material", "G4_Galactic");
+		cyl->set_string_param("material", "G4_AIR");
+		//cyl->set_string_param("material", "G4_Galactic");
 		cyl->set_double_param("place_z", projzpos3);
 		cyl->SetActive(1);
 		cyl->SuperDetector(projname3);
-		cyl->set_color(0,1,1,0.3); //reddish
+		cyl->set_color(0,1,1,0.3);
+		g4Reco->registerSubsystem(cyl);
+		
+		cyl = new PHG4CylinderSubsystem(projname4,0);
+		cyl->set_double_param("length", thinness);
+		cyl->set_double_param("radius", 2); // beampipe needs to fit here
+		cyl->set_double_param("thickness", projradius4); // 
+		cyl->set_string_param("material", "G4_AIR");
+		//cyl->set_string_param("material", "G4_Galactic");
+		cyl->set_double_param("place_z", projzpos4);
+		cyl->SetActive(1);
+		cyl->SuperDetector(projname4);
+		cyl->set_color(0,1,1,0.3); 
 		g4Reco->registerSubsystem(cyl);
 
 	}
@@ -425,6 +441,7 @@ void Fun4All_G4_HybridGEM(
         const double prapidity =1.0;
         double bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*80;
         //double bmt_length = 250;
+	cout << "BMT Length: " << bmt_length << endl;
         for (int ilayer = 0; ilayer< 6; ilayer++){
                 example01 = new PHG4CylinderStripSubsystem("BMT",ilayer);
                 example01->set_double_param("radius", BMT_r[ilayer]);
@@ -472,24 +489,24 @@ void Fun4All_G4_HybridGEM(
 	    
 	    //Hadron Endcap GEM Disks
 	    //array<double,6> Params = FullGEMParameters(1082.5, 0.95, 500, 12); //increased inner radius to account for Berkley Si Disks
-	    array<double,6> Params = FullGEMParameters(1036.25, 0.95, 270, 12);
+	    array<double,6> Params = FullGEMParameters(1036.25, 1.2, 270, 12);
 	    //array<double,6> Params = FullGEMParameters(1300, 1.05, 140, 12);
-	    //MakeGEM(Params, fgt);
+	    MakeGEM(Params, fgt);
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
-	    //MakeGEM(Params, fgt);
+	    MakeGEM(Params, fgt);
  	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
-	    //MakeGEM(Params, fgt);
+	    MakeGEM(Params, fgt);
 	    
 		
 	    //Electron Endcap GEM Disks
 	    //Params = FullGEMParameters(-1082.5, 0.95, 500, 12); //increased inner radius to account for Berkley Si Disks (this only covers 0.95-1.53 in eta)
-	    Params = FullGEMParameters(-1036.25, 0.95, 270, 12);
+	    Params = FullGEMParameters(-1036.25, 1.2, 270, 12);
 	    //Params = FullGEMParameters(-1300, 1.05, 100, 12);
-	    //MakeGEM(Params, fgt);
+	    MakeGEM(Params, fgt);
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
-	    //MakeGEM(Params, fgt); 
+	    MakeGEM(Params, fgt); 
 	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
-	    //MakeGEM(Params, fgt); 
+	    MakeGEM(Params, fgt); 
 
 	    //cout << "Endcap Parameters:" << endl;
 	    //cout << "Top Width: " << Params[2] << endl;
@@ -500,12 +517,19 @@ void Fun4All_G4_HybridGEM(
 	    MakeGEM(Params, fgt);
 	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    MakeGEM(Params, fgt); 
+	    
+	    cout << "Hadron Side: " << endl;
+	    //cout << "Top Width: " << Params[2] << endl;
+	    cout << "Radius: " << Params[0] + 30 + 50 + 210 << endl;
 
 
 	    //Far Electron Side GEM disk
 	    Params = FullGEMParameters(-1900, 1.0, 110, 18);
 	    MakeGEM(Params, fgt);
 		
+	    cout << "Lepton Side: " << endl;
+	    //cout << "Top Width: " << Params[2] << endl;
+	    cout << "Radius: " << Params[0] + 30 + 50 + 110 << endl;
 				
         
 	}
@@ -689,6 +713,7 @@ void Fun4All_G4_HybridGEM(
 		kalman->add_cylinder_state(projname1, projradius1);     // projection on cylinder (DIRC)
 		kalman->add_zplane_state  (projname2, projzpos2  );     // projection on vertical planes
 		kalman->add_zplane_state  (projname3, projzpos3  );     // projection on vertical planes
+		kalman->add_zplane_state  (projname4, projzpos4  );     // projection on vertical planes
 	}
 	
 	//kalman->Verbosity(10);
@@ -708,6 +733,7 @@ void Fun4All_G4_HybridGEM(
 		fast_sim_eval->AddProjection(projname1);
 		fast_sim_eval->AddProjection(projname2);
 		fast_sim_eval->AddProjection(projname3);
+		fast_sim_eval->AddProjection(projname4);
 	}
 	se->registerSubsystem(fast_sim_eval);
         //se->registerSubsystem(new TrackFastSimEval());
