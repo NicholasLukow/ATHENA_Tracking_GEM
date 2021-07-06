@@ -10,27 +10,31 @@
 //The following parts correspond to the different simulations you have run and want to process data for
 //Give the number of detector configurations as well as the name used to identify it in the rootfile name and a longer description for labels
 #define _NDet_ 4
-//std::string DetVers[_NDet_] = {"Nominal", "NoGems" , "NoEndcapGem", "OneEndcapGem", "TwoEndcapGem", "NoFarGem"};
-//const char *DetectorFullName[_NDet_] = {"Nominal Hybrid", "No GEM Disks", "No Endcap GEM Disks", "One Endcap GEM Disk", "Two Endcap GEM Disks", "Only Endcap GEM Disks"};
-std::string DetVers[_NDet_] = { "Nominal3Endcap", "Nominal1Endcap","NoFar3Endcap", "NoFar1Endcap"};
-const char *DetectorFullName[_NDet_] = {"3 Endcap GEM Disk", "1 Endcap GEM Disk", "3 Endcap GEM Disks, No Far GEM Disks", "1 Endcap GEM Disk, No Far GEM Disks"};
+//std::string DetVers[_NDet_] = {"B1.0-P1.0-N1.0_v0.1", "B1.0-P5.0-N5.0_v0.1", "B1.0-P2.0-N2.0_v0.1", "B1.0-P6.0-N6.0_v0.1" }; 
+//const char *DetectorFullName[_NDet_] = {"Nominal (No Endcap GEMS)","One Endcap GEM Disk","Two Endcap GEM Disks", "Three Endcap GEM Disks"};
+std::string DetVers[_NDet_] = {"B1.0-P4.0-N4.0_v0.1", "B1.0-P1.0-N1.0_v0.1", "B1.0-P3.0-N3.0_v0.1", "B1.0-P2.0-N2.0_v0.1" }; 
+const char *DetectorFullName[_NDet_] = {"No GEMS" ,"Nominal (No Endcap GEMS)","Two Endcap GEM Disks, No Far Forward/Backward Disks", "Two Endcap GEM Disks with Forward/Backward Disks"};
+
+//make the first detector/field option in the array the version you want to be the reference set for the ratio
+#define _RATIOPLOT_ 0
+
 
 //Give the number of field maps as well as the name used to identify it in the rootfile name and a longer description for labels
 #define _NBField_ 1
 //std::string BField[_NBField_] = {"ATHENA", "NewBeAST", "Beast", "B_3.0T"};
 //const char *FieldMapName[_NBField_] = {"05-28 BeAST Field Map Update", "05-07 BeAST Field Map Update", "Original BeAST Field Map", "Uniform 3.0T"};
-std::string BField[_NBField_] = { "ATHENA"};
+std::string BField[_NBField_] = { "ATHENA0507"};
 const char *FieldMapName[_NBField_] = {"ATHENA"};
 
 //The maximum value for the y-axis. This will automatically be increased to be larger than the largest y-value if it is set too low
-double ymax =  3.5;
+double ymax =  1.5;
 
 //---------------------------------------------------------------------------------------------------------------------------------------  
 //=======================================================================================================================================
 //---------------------------------------------------------------------------------------------------------------------------------------  
 
 
-void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ = 29, double PMin = 1, double PMax =30, int _PT_ = 0, int _NY_ = 0, int _PROJ_ = 0, int _PVAR_ = 1, int _DRAWFITS_ = 0, int _DRAWPWGReq_ = 0 )
+void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ = 29, double PMin = 1, double PMax =30, int _PT_ = 0, int _NY_ = 0, int _PROJ_ = 0, int _PVAR_ = 0, int _DRAWFITS_ = 0, int _DRAWPWGReq_ = 0 )
 {
 
 	//defining some variables/arrays
@@ -85,6 +89,10 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 	TH1D *h_BACKThetaRes[_NDet_][_NBField_][_NEta_][_NP_], *h_BACKThetaRespt[_NDet_][_NBField_][_NEta_][_NP_];	
 	TH1D *h_BACKPhiRes[_NDet_][_NBField_][_NEta_][_NP_], *h_BACKPhiRespt[_NDet_][_NBField_][_NEta_][_NP_];
 
+	TH1D *h_MIDRICHPointRes[_NDet_][_NBField_][_NEta_][_NP_], *h_MIDRICHPointRespt[_NDet_][_NBField_][_NEta_][_NP_];	
+	TH1D *h_MIDRICHThetaRes[_NDet_][_NBField_][_NEta_][_NP_], *h_MIDRICHThetaRespt[_NDet_][_NBField_][_NEta_][_NP_];	
+	TH1D *h_MIDRICHPhiRes[_NDet_][_NBField_][_NEta_][_NP_], *h_MIDRICHPhiRespt[_NDet_][_NBField_][_NEta_][_NP_];	
+
 	for (int iDet = 0; iDet < _NDet_; iDet++)
 	{
 		for (int iB = 0; iB < _NBField_; iB++)
@@ -130,6 +138,12 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 					h_BACKPhiRespt[iDet][iB][iEta][iP] = new TH1D(  Form("h_BACKPhiRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),        Form("Phi Resolution at EM Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
 					
 					
+					h_MIDRICHPointRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_MIDRICHPointRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Pointing Resolution at Hadron Calorimeter for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*POINTRANGE, POINTRANGE);
+					h_MIDRICHPointRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_MIDRICHPointRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Pointing Resolution at Hadron Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*POINTRANGE, POINTRANGE);
+					h_MIDRICHThetaRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_MIDRICHThetaRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),       Form("Theta Resolution at Hadron Calorimeter for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
+					h_MIDRICHThetaRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_MIDRICHThetaRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Theta Resolution at Hadron Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
+					h_MIDRICHPhiRes[iDet][iB][iEta][iP] = new TH1D(    Form("h_MIDRICHPhiRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),           Form("Phi Resolution at Hadron Calorimeter for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
+					h_MIDRICHPhiRespt[iDet][iB][iEta][iP] = new TH1D(  Form("h_MIDRICHPhiRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),        Form("Phi Resolution at Hadron Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
 					//setting names for the hit histogram
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(1,"Si Vtx");
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(2,"Si Barrel");
@@ -229,6 +243,20 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 	Float_t	   BACK_px;
 	Float_t	   BACK_py;
 	Float_t	   BACK_pz;
+	Float_t	   MIDRICH_proj_x;
+	Float_t	   MIDRICH_proj_y;
+	Float_t	   MIDRICH_proj_z;
+	Float_t	   MIDRICH_proj_lt;
+	Float_t	   MIDRICH_proj_px;
+	Float_t	   MIDRICH_proj_py;
+	Float_t	   MIDRICH_proj_pz;
+	Float_t	   MIDRICH_x;
+	Float_t	   MIDRICH_y;
+	Float_t	   MIDRICH_z;
+	Float_t	   MIDRICH_lt;
+	Float_t	   MIDRICH_px;
+	Float_t	   MIDRICH_py;
+	Float_t	   MIDRICH_pz;
 
 
 
@@ -322,6 +350,20 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 			   tree->SetBranchAddress("BACK_px", &BACK_px);
 			   tree->SetBranchAddress("BACK_py", &BACK_py);
 			   tree->SetBranchAddress("BACK_pz", &BACK_pz);
+			   tree->SetBranchAddress("MIDRICH_proj_x", &MIDRICH_proj_x);
+			   tree->SetBranchAddress("MIDRICH_proj_y", &MIDRICH_proj_y);
+			   tree->SetBranchAddress("MIDRICH_proj_z", &MIDRICH_proj_z);
+			   tree->SetBranchAddress("MIDRICH_proj_t", &MIDRICH_proj_lt);
+			   tree->SetBranchAddress("MIDRICH_proj_px", &MIDRICH_proj_px);
+			   tree->SetBranchAddress("MIDRICH_proj_py", &MIDRICH_proj_py);
+			   tree->SetBranchAddress("MIDRICH_proj_pz", &MIDRICH_proj_pz);
+			   tree->SetBranchAddress("MIDRICH_x", &MIDRICH_x);
+			   tree->SetBranchAddress("MIDRICH_y", &MIDRICH_y);
+			   tree->SetBranchAddress("MIDRICH_z", &MIDRICH_z);
+			   tree->SetBranchAddress("MIDRICH_t", &MIDRICH_lt);
+			   tree->SetBranchAddress("MIDRICH_px", &MIDRICH_px);
+			   tree->SetBranchAddress("MIDRICH_py", &MIDRICH_py);
+			   tree->SetBranchAddress("MIDRICH_pz", &MIDRICH_pz);
 
 
 			// run the "analysis" simply getting tracks and filling the residual histograms
@@ -340,6 +382,8 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 				TVector3 FORProjPos(FOR_proj_x, FOR_proj_y, FOR_proj_z);
 				TVector3 BACKPos(BACK_x, BACK_y, BACK_z);
 				TVector3 BACKProjPos(BACK_proj_x, BACK_proj_y, BACK_proj_z);
+				TVector3 MIDRICHPos(MIDRICH_x, MIDRICH_y, MIDRICH_z);
+				TVector3 MIDRICHProjPos(MIDRICH_proj_x, MIDRICH_proj_y, MIDRICH_proj_z);
 				//hits and projections of tracks 
 				TVector3 DIRCMom(DIRC_px, DIRC_py, DIRC_pz);
 				TVector3 DIRCProjMom(DIRC_proj_px, DIRC_proj_py, DIRC_proj_pz);
@@ -347,6 +391,8 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 				TVector3 FORProjMom(FOR_proj_px, FOR_proj_py, FOR_proj_pz);
 				TVector3 BACKMom(BACK_px, BACK_py, BACK_pz);
 				TVector3 BACKProjMom(BACK_proj_px, BACK_proj_py, BACK_proj_pz);
+				TVector3 MIDRICHMom(MIDRICH_px, MIDRICH_py, MIDRICH_pz);
+				TVector3 MIDRICHProjMom(MIDRICH_proj_px, MIDRICH_proj_py, MIDRICH_proj_pz);
 				//Loop over eta as to store information in the properly indexed histogram
 				for (int iEta = 0; iEta < _NEta_; iEta++)
 				{
@@ -389,6 +435,13 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 										h_BACKThetaRes[iDet][iB][iEta][iP]->Fill(BACKMom.Theta() - BACKProjMom.Theta());
 										h_BACKPhiRes[iDet][iB][iEta][iP]->Fill(BACKMom.Phi() - BACKProjMom.Phi());
 									}	
+									
+									if (MIDRICHPos.Mag() < 17318)
+									{
+										h_MIDRICHPointRes[iDet][iB][iEta][iP]->Fill( (MIDRICHPos-MIDRICHProjPos).Mag() );				
+										h_MIDRICHThetaRes[iDet][iB][iEta][iP]->Fill(MIDRICHMom.Theta() - MIDRICHProjMom.Theta());
+										h_MIDRICHPhiRes[iDet][iB][iEta][iP]->Fill(MIDRICHMom.Phi() - MIDRICHProjMom.Phi());
+									}
 									
 
 									h_momRes[iDet][iB][iEta][iP]->Fill( (recoP.Mag() - truthP.Mag())/truthP.Mag());  
@@ -438,6 +491,13 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 										h_BACKPointRespt[iDet][iB][iEta][iP]->Fill( (DIRCPos-DIRCProjPos).Mag() );	
 										h_BACKThetaRespt[iDet][iB][iEta][iP]->Fill(DIRCPos.Theta() - DIRCProjPos.Theta());
 										h_BACKPhiRespt[iDet][iB][iEta][iP]->Fill(dPhi);				
+									}
+
+									if (MIDRICHPos.Mag() < 17318)
+									{
+										h_MIDRICHPointRespt[iDet][iB][iEta][iP]->Fill( (DIRCPos-DIRCProjPos).Mag() );	
+										h_MIDRICHThetaRespt[iDet][iB][iEta][iP]->Fill(DIRCPos.Theta() - DIRCProjPos.Theta());
+										h_MIDRICHPhiRespt[iDet][iB][iEta][iP]->Fill(dPhi);
 									}
 
 									h_ptRes[iDet][iB][iEta][iP]->Fill( (recoP.Pt() - truthP.Pt())/truthP.Pt());  
@@ -497,6 +557,12 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 					h_BACKPhiRes[iDet][iB][iEta][iP]->Write();
 					h_BACKPhiRespt[iDet][iB][iEta][iP]->Write();
 					
+					h_MIDRICHPointRes[iDet][iB][iEta][iP]->Write();
+					h_MIDRICHPointRespt[iDet][iB][iEta][iP]->Write();
+					h_MIDRICHThetaRes[iDet][iB][iEta][iP]->Write();
+					h_MIDRICHThetaRespt[iDet][iB][iEta][iP]->Write();
+					h_MIDRICHPhiRes[iDet][iB][iEta][iP]->Write();
+					h_MIDRICHPhiRespt[iDet][iB][iEta][iP]->Write();
 
 				}
 			}
@@ -513,8 +579,8 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 //Make the plots
 
 	//Strings used for getting histograms and labeling axes. Should be no need to change these unless a change is made to the Fun4All macro.
-	std::string ProjectionLocation[3] = {"DIRC", "FOR" , "BACK"};
-	std::string LocationFullName[3] = {"DIRC", "RICH" , "EMCal"};
+	std::string ProjectionLocation[4] = {"DIRC", "FOR" , "BACK", "MIDRICH"};
+	std::string LocationFullName[4] = {"DIRC", "dRICH Entrance" , "mRICH Entrance" , "dRICH Gas Center"};
 	std::string ProjectionVariable[3] = {"Point", "Theta" , "Phi"};
 	std::string VariableFullName[3] = {"Pointing", "Theta" , "Phi"};
 
@@ -652,6 +718,14 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
     PWGReq[3] = new TF1("PWGReq_1.0_2.5"  , "TMath::Sqrt((0.05*x)^2+1.0^2)", 1, 30);
     PWGReq[4] = new TF1("PWGReq_2.5_3.5"  , "TMath::Sqrt((0.10*x)^2+2.0^2)", 1, 30);
 
+	//upon further investigation... It appears this is the exact same as the momentum resolution requirements... that can't be correct...
+    TF1 *PWGPtReq[5];
+    PWGPtReq[0] = new TF1("PWGPtReq_-3.5_-2.5", "TMath::Sqrt((0.10*x)^2+0.5^2)", 1, 30);
+    PWGPtReq[1] = new TF1("PWGPtReq_-2.5_-1.0", "TMath::Sqrt((0.05*x)^2+0.5^2)", 1, 30);
+    PWGPtReq[2] = new TF1("PWGPtReq_-1.0_1.0" , "TMath::Sqrt((0.05*x)^2+0.5^2)", 1, 30);
+    PWGPtReq[3] = new TF1("PWGPtReq_1.0_2.5"  , "TMath::Sqrt((0.05*x)^2+1.0^2)", 1, 30);
+    PWGPtReq[4] = new TF1("PWGPtReq_2.5_3.5"  , "TMath::Sqrt((0.10*x)^2+2.0^2)", 1, 30);
+
 
     //PWG Transverse Pointing Resolution from the Yellow Report (Table 11.2)
     TF1 *PWGReq_DCA2D[6];
@@ -661,6 +735,7 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
     PWGReq_DCA2D[3] = new TF1("PWGReq_DCA2D_1_2.5", "TMath::Sqrt((30/x)^2+20^2)", 1, 30);
     PWGReq_DCA2D[4] = new TF1("PWGReq_DCA2D_2.5_3", "TMath::Sqrt((30/x)^2+40^2)", 1, 30);
     PWGReq_DCA2D[5] = new TF1("PWGReq_DCA2D_3_3.5", "TMath::Sqrt((30/x)^2+60^2)", 1, 30);
+
 
 
 
@@ -691,11 +766,24 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 		      	{
 			  	for (int iA = 0; iA < _NEta_; iA++)
 		        {
-					if (_NY_ == 0)
+					if (_RATIOPLOT_)
+					{
+						if (_NY_ == 2)
+						{
+							res[index] = Efficiency[iA][iP][iD][iB]/Efficiency[iA][iP][0][0];
+							reserr[index] = 0;
+						}
+						else
+						{
+							res[index] = Resolution[iA][iP][iD][iB]/Resolution[iA][iP][0][0];
+	   	  	  	  			reserr[index] = res[index]*(TMath::Sqrt( (ResErr[iA][iP][iD][iB]/Resolution[iA][iP][iD][iB])*(ResErr[iA][iP][iD][iB]/Resolution[iA][iP][iD][iB]) + (ResErr[iA][iP][0][0]/Resolution[iA][iP][0][0])*(ResErr[iA][iP][0][0]/Resolution[iA][iP][0][0]) ));  
+						}
+					}
+					else if (_NY_ == 0)
 					{
 						//convert to %
 						res[index] = 100*Resolution[iA][iP][iD][iB];
-	   	  	  	  		reserr[index] = 100*ResErr[iA][iP][iD][iB];
+	   	  	  	  		reserr[index] = 100*ResErr[iA][iP][iD][iB];	
 					}
 					else if (_NY_ == 1)
 					{
@@ -783,28 +871,41 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
     hdum->GetXaxis()->SetLabelSize(0.05);
     if(_NY_ == 0)
     {
-    	if (_PT_) hdum->GetYaxis()->SetTitle("p_{T} resolution   #sigma_{p_{T}} /p_{T}  [%]");
-    	else hdum->GetYaxis()->SetTitle("p resolution   #sigma_{p} /p  [%]");
-    }
+    	if (_PT_) 
+		{
+			if (_RATIOPLOT_) hdum->GetYaxis()->SetTitle("Ratio of p_{T} resolution   #sigma_{p_{T}} /p_{T}  ");
+			else hdum->GetYaxis()->SetTitle("p_{T} resolution   #sigma_{p_{T}} /p_{T}  [%]");
+		}
+		else 
+		{
+			if (_RATIOPLOT_) hdum->GetYaxis()->SetTitle("Ratio of p resolution   #sigma_{p} /p  ");
+			else hdum->GetYaxis()->SetTitle("p resolution   #sigma_{p} /p  [%]");
+		}
+	}
     else if (_NY_ == 1)
     {
-    	hdum->GetYaxis()->SetTitle("#sigma_{DCA_{2D}} [#mum]");
+		if(_RATIOPLOT_) hdum->GetYaxis()->SetTitle("Ratio of #sigma_{DCA_{2D}}");
+    	else hdum->GetYaxis()->SetTitle("#sigma_{DCA_{2D}} [#mum]");
     }
     else if (_NY_ == 2)
     {
-    	hdum->GetYaxis()->SetTitle("Efficiency");
+		if (_RATIOPLOT_) hdum->GetYaxis()->SetTitle("Ratio of Efficiency");
+    	else hdum->GetYaxis()->SetTitle("Efficiency");
     }
 	else if (_NY_ ==3 && _PVAR_ == 0)
 	{
-		hdum->GetYaxis()->SetTitle("Pointing Resolution [#mum]");
+		if (_RATIOPLOT_) hdum->GetYaxis()->SetTitle("Ratio of Pointing Resolution");
+		else hdum->GetYaxis()->SetTitle("Pointing Resolution [#mum]");
 	}
 	else if (_NY_ ==3 && (_PVAR_ == 1 || _PVAR_ == 2))
 	{
-		hdum->GetYaxis()->SetTitle(Form( "%s Resolution [mRad]" ,VariableFullName[_PVAR_].c_str()));
+		if (_RATIOPLOT_) hdum->GetYaxis()->SetTitle(Form( "Ratio of %s Resolution" ,VariableFullName[_PVAR_].c_str()));
+		else hdum->GetYaxis()->SetTitle(Form( "%s Resolution [mRad]" ,VariableFullName[_PVAR_].c_str()));
 	}
     else if (_NY_ == 4)
     {
-    	hdum->GetYaxis()->SetTitle("#sigma_{DCA_{z}} [#mum]");
+		if (_RATIOPLOT_) hdum->GetYaxis()->SetTitle("Ratio of #sigma_{DCA_{z}}");
+    	else hdum->GetYaxis()->SetTitle("#sigma_{DCA_{z}} [#mum]");
     }
 
     hdum->GetYaxis()->SetTitleSize(0.06);
@@ -938,7 +1039,7 @@ void Analysis( int _NEta_ = 1, double EtaMin = -1, double EtaMax = 1, int _NP_ =
 	{
 		for (int iB = 0; iB < _NBField_; iB++) 
 		{
-			TString SetupName = Form("%s_%s", DetVers[iD].c_str(), BField[iB].c_str());
+			TString SetupName = Form("%s_%s_Eta_%0.1lf-%0.1lf_P_%0.1lf-%0.1lf", DetVers[iD].c_str(), BField[iB].c_str(), EtaMin, EtaMax, PMin, PMax);
 			TPDF *ps = new TPDF(Form("./Plots/FittedHistograms_%s.pdf", SetupName.Data()));
 			cPS->Clear();
 			cPS->Divide(2,3);
