@@ -12,7 +12,8 @@ First open a shell in the singularity container using:
 
 
 You must also install the MicroMegas simulation: https://github.com/hqh0127/EIC_MMStripCZ
-Install this by going into the source directory, making a build folder, running the autogen.sh script and installing
+And the modified Aluminum support.
+Install these by going into the source directory, making a build folder, running the autogen.sh script and installing (for each)
 > cd source
 
 > mkdir build
