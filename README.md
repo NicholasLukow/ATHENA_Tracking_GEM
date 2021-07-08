@@ -5,7 +5,7 @@ There is also a simple mid-rapidity Beryllium beam pipe as well as optional forw
 In order to make use of the new field map (option 5 in the .C script), you must retrieve it from here: https://github.com/eic/BeastMagneticField
 
 In order to make use of the GEMs, you must first install the EicToyModel. This can be found here: https://github.com/eic/EicToyModel
-Follow the install instructions there.
+Follow the install instructions there. But for all "source" lines use /cvmfs/eic.opensciencegrid.org/default/opt/fun4all/core/bin/ versions
 
 First open a shell in the singularity container using:
 >singularity shell -B /cvmfs:/cvmfs -B /direct/eic+u/USERNAME/scratch:/scratch/ /cvmfs/eic.opensciencegrid.org/singularity/rhic_sl7_ext.simg
