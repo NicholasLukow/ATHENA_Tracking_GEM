@@ -1,0 +1,52 @@
+// Tell emacs that this is a C++ source
+//  -*- C++ -*-.
+#ifndef ALLSI_AL_SUPPORT_STEPPINGACTION_H
+#define ALLSI_AL_SUPPORT_STEPPINGACTION_H
+
+#include <g4main/PHG4SteppingAction.h>
+
+class Al_support_Detector;
+
+class G4Step;
+class G4VPhysicalVolume;
+class PHCompositeNode;
+class PHG4Hit;
+class PHG4HitContainer;
+class PHParameters;
+
+class Al_support_SteppingAction : public PHG4SteppingAction
+{
+ public:
+  //! constructor
+  Al_support_SteppingAction(Al_support_Detector*, const PHParameters* parameters);
+
+  //! destructor
+  virtual ~Al_support_SteppingAction();
+
+  //! stepping action
+  virtual bool UserSteppingAction(const G4Step*, bool);
+
+  //! reimplemented from base class
+  virtual void SetInterfacePointers(PHCompositeNode*);
+
+ private:
+  //! pointer to the detector
+  Al_support_Detector* m_Detector;
+  const PHParameters* m_Params;
+  //! pointer to hit container
+  PHG4HitContainer* m_HitContainer;
+  PHG4Hit* m_Hit;
+  PHG4HitContainer* m_SaveHitContainer;
+  G4VPhysicalVolume* m_SaveVolPre;
+  G4VPhysicalVolume* m_SaveVolPost;
+
+  int m_SaveTrackId;
+  int m_SavePreStepStatus;
+  int m_SavePostStepStatus;
+  int m_ActiveFlag;
+  int m_BlackHoleFlag;
+  double m_EdepSum;
+  double m_EionSum;
+};
+
+#endif // ALLSI_AL_SUPPORT_STEPPINGACTION_H
