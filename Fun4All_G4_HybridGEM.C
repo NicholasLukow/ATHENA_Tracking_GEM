@@ -29,9 +29,16 @@
 #include <g4trackfastsim/PHG4TrackFastSimEval.h>
 #include <phool/recoConsts.h>
 #include <g4lblvtx/PHG4ParticleGenerator_flat_pT.h>
-#include <g4lblvtx/AllSi_Al_support_Subsystem.h>
+//#include <g4lblvtx/AllSi_Al_support_Subsystem.h>
 #include <g4lblvtx/EicFRichSubsystem.h>
 #include "G4_BlackHole.C"
+
+
+#include <g4alsupp/Al_support_Subsystem.h>
+
+
+
+
 
 #include "G4_Pipe_EIC.C"
 
@@ -49,19 +56,15 @@
 #include <gdmlimporter/TrackFastSimEval.h>
 #include <g4detectors/PHG4GDMLSubsystem.h>
 
-#ifdef _GEMS_
 #include "G4_GEM_EIC_v1.C"
 //to include gems                                                                                                                                     
 #include <EicToyModelSubsystem.h>
 #include <EicRootGemSubsystem.h>
 #include <EtmOrphans.h>
-#endif
 
-#ifdef _MPGD_
 //For MPGD from QH                                                                                                                                    
 #include <g4exampledetector/PHG4CylinderStripSubsystem.h>
 #include <g4exampledetector/CreateCZHitContainer.h>
-#endif
 
 #include <TrackFastSimEval.h>
 
@@ -81,7 +84,6 @@ R__LOAD_LIBRARY(libg4histos.so)
 R__LOAD_LIBRARY(libPHPythia6.so)
 
 
-#ifdef _GEMS_
 //Function to make GEM disk
 void MakeGEM(array<double,6> Params, EicRootGemSubsystem *&fgt)
 {
@@ -115,15 +117,14 @@ array<double,6> FullGEMParameters(double Z, double EtaMin, double InnerRadius, d
 	    array<double,6 > Params = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
 	    return Params;
 }
-#endif
 
 void Fun4All_G4_HybridGEM(
 			int nEvents = -1,			// number of events
 			double pmin = 1., 			// GeV/c
 			double pmax = 30., 			// GeV/c
-			double etamin = -3.5,
-			double etamax = 3.5,
-			int generatorVersion = 5, 		// Generator setting
+			double etamin = -3.7,
+			double etamax = 3.7,
+			int generatorVersion = 1, 		// Generator setting
 			int magnetic_field = 5, 		// Magnetic field setting
 			TString out_name = "TEST")	// output filename
 {	
@@ -150,16 +151,16 @@ void Fun4All_G4_HybridGEM(
 	double thinness    = 0.01;               // black hole thickness, needs to be taken into account for the z positions
 	// ---
 	string projname2   = "FOR";             // Forward plane object name
-	double projzpos2   = 220+thinness/2;//315+thinness/2.;   // [cm]
-	double projradius2 = 146;//210.;               // [cm]
+	double projzpos2   = 130+thinness/2;//315+thinness/2.;   // [cm]
+	double projradius2 = 100;//210.;               // [cm]
 	// ---
 	string projname3   = "BACK";            // Backward plane object name
 	double projzpos3   = -(138+thinness/2.);// [cm]
 	double projradius3 = 130.;               // [cm]
 	// ---
 	string projname4   = "MIDRICH";            // Backward plane object name
-	double projzpos4   = 130;// [cm]
-	double projradius4 = 100.;               // [cm]
+	double projzpos4   = 220;// [cm]
+	double projradius4 = 146.;               // [cm]
 	// ======================================================================================================
 	// Make the Server
 	Fun4AllServer *se = Fun4AllServer::instance();
@@ -237,49 +238,53 @@ void Fun4All_G4_HybridGEM(
 	
 	if(do_projections){
 		PHG4CylinderSubsystem *cyl;
-		cyl = new PHG4CylinderSubsystem(projname1,0);
+		cyl = new PHG4CylinderSubsystem(projname1);
 		cyl->set_double_param("length", length1);
 		cyl->set_double_param("radius", projradius1); // dirc radius
-		cyl->set_double_param("thickness", 0.1); // needs some thickness
+		cyl->set_double_param("thickness", 0.01); // needs some thickness
 		cyl->set_string_param("material", "G4_AIR");
 		//cyl->set_string_param("material", "G4_Galactic");
-		cyl->SetActive(1);
+		cyl->SetActive();
+		cyl->SaveAllHits();
 		cyl->SuperDetector(projname1);
 		cyl->set_color(1,0,0,0.7); //reddish
 		g4Reco->registerSubsystem(cyl);
 
-		cyl = new PHG4CylinderSubsystem(projname2,0);
+		cyl = new PHG4CylinderSubsystem(projname2);
 		cyl->set_double_param("length", thinness);
-		cyl->set_double_param("radius", 2); // beampipe needs to fit here
+		cyl->set_double_param("radius", 10); // beampipe needs to fit here
 		cyl->set_double_param("thickness", projradius2); // 
 		cyl->set_string_param("material", "G4_AIR");
 		//cyl->set_string_param("material", "G4_Galactic");
 		cyl->set_double_param("place_z", projzpos2);
-		cyl->SetActive(1);
+		cyl->SetActive();
+		cyl->SaveAllHits();
 		cyl->SuperDetector(projname2);
 		cyl->set_color(0,1,1,0.3); 
 		g4Reco->registerSubsystem(cyl);
 
-		cyl = new PHG4CylinderSubsystem(projname3,0);
+		cyl = new PHG4CylinderSubsystem(projname3);
 		cyl->set_double_param("length", thinness);
-		cyl->set_double_param("radius", 2); // beampipe needs to fit here
+		cyl->set_double_param("radius", 10); // beampipe needs to fit here
 		cyl->set_double_param("thickness", projradius3); // 
 		cyl->set_string_param("material", "G4_AIR");
 		//cyl->set_string_param("material", "G4_Galactic");
 		cyl->set_double_param("place_z", projzpos3);
-		cyl->SetActive(1);
+		cyl->SetActive();
+		cyl->SaveAllHits();
 		cyl->SuperDetector(projname3);
 		cyl->set_color(0,1,1,0.3);
 		g4Reco->registerSubsystem(cyl);
 		
-		cyl = new PHG4CylinderSubsystem(projname4,0);
+		cyl = new PHG4CylinderSubsystem(projname4);
 		cyl->set_double_param("length", thinness);
-		cyl->set_double_param("radius", 2); // beampipe needs to fit here
+		cyl->set_double_param("radius", 15); // beampipe needs to fit here
 		cyl->set_double_param("thickness", projradius4); // 
 		cyl->set_string_param("material", "G4_AIR");
 		//cyl->set_string_param("material", "G4_Galactic");
 		cyl->set_double_param("place_z", projzpos4);
-		cyl->SetActive(1);
+		cyl->SetActive();
+		cyl->SaveAllHits();
 		cyl->SuperDetector(projname4);
 		cyl->set_color(0,1,1,0.3); 
 		g4Reco->registerSubsystem(cyl);
@@ -350,7 +355,7 @@ void Fun4All_G4_HybridGEM(
   	double si_z_pos[] = {-121., -96.25, -71.5, -46.75, -22.0, 22.0, 46.75, 71.5, 96.25, 121.};
   	const int nDisks = sizeof(si_z_pos)/sizeof(*si_z_pos);
   	double si_r_max[] = {19.0, 19.0, 19.0, 19.0, 7.13, 7.13, 19.0, 19.0, 19.0, 19.0};
-  	double si_r_min[] = {7.93, 7.25, 4.65, 3.64, 3.64, 3.64, 3.64, 4.65, 7.25, 9.93};
+  	double si_r_min[] = {9.93, 7.25, 4.65, 3.64, 3.64, 3.64, 3.64, 4.65, 7.25, 9.93};
   	double si_thick_disk = 0.24/100.*9.37;
 
  	for (int ilayer = 0; ilayer < nDisks ; ilayer++){
@@ -370,7 +375,7 @@ void Fun4All_G4_HybridGEM(
 		
 	#ifdef _ALSUPP_
 	// Al Support Structure
-	AllSi_Al_support_Subsystem *Al_supp = new AllSi_Al_support_Subsystem("Al_supp");
+	Al_support_Subsystem *Al_supp = new Al_support_Subsystem("Al_supp");
 	g4Reco->registerSubsystem(Al_supp);	
 	#endif
 	// ------------	
@@ -462,80 +467,74 @@ void Fun4All_G4_HybridGEM(
         }
         #endif
 
-#ifdef _GEMS_
-
-        // Forward GEM tracker module(s);                                                                                                            \
-                                                                                                                                                      
-        auto fgt = new EicRootGemSubsystem("FGT");
+#ifdef _INNERGEMS_
+        // Forward GEM tracker module(s);  
+        auto fgt = new EicRootGemSubsystem("INNERGEM");
         {
 	 	 fgt->SetActive(true);
          	{
-	 //fgt->CheckOverlap();                                                                                                                     \
-                                                                                                                                                      
-          //fgt->SetTGeoGeometryCheckPrecision(0.000001 * etm::um);                                                                                  \
-                                                                             
-            // See other GemModule class data in GemGeoParData.h;                                                                                    \
-            // Compose sectors; parameters are:                                                                                                      \
-            //   - layer description (obviously can mix different geometries);                                                                       \
-            //   - azimuthal segmentation;                                                                                                            
-            //   - gas volume center radius;                                                                                                         \
-            //   - Z offset from 0.0 (default);                                                                                                      \
-            //   - azimuthal rotation from 0.0 (default);                                                                                            \
+	 	//fgt->CheckOverlap();                                                                                                                     \
+          	//fgt->SetTGeoGeometryCheckPrecision(0.000001 * etm::um);                                                                                  \
+            	// See other GemModule class data in GemGeoParData.h;                                                                                    \
+            	// Compose sectors; parameters are:                                                                                                      \
+            	//   - layer description (obviously can mix different geometries);                                                                       \
+            	//   - azimuthal segmentation;                                                                                                            
+            	//   - gas volume center radius;                                                                                                         \
+            	//   - Z offset from 0.0 (default);                                                                                                      \
+            	//   - azimuthal rotation from 0.0 (default);                                                                                            \
 		
 		//FullGEMParameters() will calculate the parameters to define the geometry of the GEM disk based on the Z location, minimum eta coverage, inner radius clearance, and number of modules
 	        //Array definition: Params[] = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
-
-
 	    
-	    //Hadron Endcap GEM Disks
-	    //array<double,6> Params = FullGEMParameters(1082.5, 0.95, 500, 12); //increased inner radius to account for Berkley Si Disks
-	    array<double,6> Params = FullGEMParameters(1036.25, 1.2, 270, 12);
-	    //array<double,6> Params = FullGEMParameters(1300, 1.05, 140, 12);
-	    MakeGEM(Params, fgt);
- 	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
-	    MakeGEM(Params, fgt);
- 	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
-	    MakeGEM(Params, fgt);
-	    
+	    	//Hadron Endcap GEM Disks
+	    	array<double,6> Params = FullGEMParameters(1036.25, 1.2, 270, 12);
+	    	//array<double,6> Params = FullGEMParameters(1036.25, 0.95, 270, 12);
+	    	MakeGEM(Params, fgt);
+ 	    	Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
+	    	MakeGEM(Params, fgt);
+ 	    	Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
+	    	MakeGEM(Params, fgt);
 		
-	    //Electron Endcap GEM Disks
-	    //Params = FullGEMParameters(-1082.5, 0.95, 500, 12); //increased inner radius to account for Berkley Si Disks (this only covers 0.95-1.53 in eta)
-	    Params = FullGEMParameters(-1036.25, 1.2, 270, 12);
-	    //Params = FullGEMParameters(-1300, 1.05, 100, 12);
-	    MakeGEM(Params, fgt);
-	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
-	    MakeGEM(Params, fgt); 
-	    Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
-	    MakeGEM(Params, fgt); 
+	    	//Electron Endcap GEM Disks
+	    	Params = FullGEMParameters(-1036.25, 1.2, 270, 12);
+	    	//Params = FullGEMParameters(-1036.25, 0.95, 270, 12);
+	    	MakeGEM(Params, fgt);
+	    	Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
+	    	MakeGEM(Params, fgt); 
+		Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
+		MakeGEM(Params, fgt); 
 
-	    //cout << "Endcap Parameters:" << endl;
-	    //cout << "Top Width: " << Params[2] << endl;
-	    //cout << "Active Length: " << Params[0] << endl;
-
-	    //Far Hadron Side GEM disk
-	    Params = FullGEMParameters(3050, 1.2, 210, 12);
-	    MakeGEM(Params, fgt);
-	    Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
-	    MakeGEM(Params, fgt); 
-	    
-	    cout << "Hadron Side: " << endl;
-	    //cout << "Top Width: " << Params[2] << endl;
-	    cout << "Radius: " << Params[0] + 30 + 50 + 210 << endl;
-
-
-	    //Far Electron Side GEM disk
-	    Params = FullGEMParameters(-1900, 1.0, 110, 18);
-	    MakeGEM(Params, fgt);
-		
-	    cout << "Lepton Side: " << endl;
-	    //cout << "Top Width: " << Params[2] << endl;
-	    cout << "Radius: " << Params[0] + 30 + 50 + 110 << endl;
-				
         
+		}
+ 	        g4Reco->registerSubsystem(fgt);
 	}
-          g4Reco->registerSubsystem(fgt);
-}
 #endif
+
+#ifdef _OUTERGEMS_
+        // Forward GEM tracker module(s);  
+        auto fgt2 = new EicRootGemSubsystem("OUTERGEM");
+        {
+	 	fgt2->SetActive(true);
+         	{
+		//FullGEMParameters() will calculate the parameters to define the geometry of the GEM disk based on the Z location, minimum eta coverage, inner radius clearance, and number of modules
+	        //Array definition: Params[] = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
+
+	    	//Far Hadron Side GEM disk
+	    	array<double,6> Params = FullGEMParameters(3050, 1.2, 210, 12);
+	    	MakeGEM(Params, fgt2);
+	    	Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
+	    	MakeGEM(Params, fgt2); 
+
+	    	//Far Electron Side GEM disk
+	    	Params = FullGEMParameters(-1900, 1.0, 110, 18);
+	    	MakeGEM(Params, fgt2);
+        
+		}
+          	g4Reco->registerSubsystem(fgt2);
+	}
+
+#endif
+
 
   // Detailed vertex Si tracker from EicToyModel
   // EicRoot vertex tracker; be aware: "VST" will also become a SuperDetector name;
@@ -679,19 +678,25 @@ void Fun4All_G4_HybridGEM(
 	#endif
 
 
-	#ifdef _GEMS_
+	#ifdef _INNERGEMS_
         // GEM tracker hits;
-                                                                                                                                                      
         kalman->add_phg4hits(fgt->GetG4HitName(),
-                                                                                                                                                      
                              PHG4TrackFastSim::Vertical_Plane,
                              250e-4, //999. // radial-resolution [cm] (this number is not used in cylindrical geometry)                             
                              50e-4,        // azimuthal (arc-length) resolution [cm]    
                              999., //70e-4       // longitudinal (z) resolution [cm]                                                                   
                              1,// efficiency (fraction)                                                                        
                              0);// hit noise   
-                                                                                                                                                      
-
+	#endif
+	#ifdef _OUTERGEMS_
+        // GEM tracker hits;
+        kalman->add_phg4hits(fgt2->GetG4HitName(),
+                             PHG4TrackFastSim::Vertical_Plane,
+                             250e-4, //999. // radial-resolution [cm] (this number is not used in cylindrical geometry)                             
+                             50e-4,        // azimuthal (arc-length) resolution [cm]    
+                             999., //70e-4       // longitudinal (z) resolution [cm]                                                                   
+                             1,// efficiency (fraction)                                                                        
+                             0);// hit noise   
 	#endif
 
 	#ifdef _EICTOYVST_
