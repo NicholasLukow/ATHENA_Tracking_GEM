@@ -9,11 +9,36 @@
 //Here are the only parameters that need changing for most analyses (others are changed in the arguments given... See shell script)
 //The following parts correspond to the different simulations you have run and want to process data for
 //Give the number of detector configurations as well as the name used to identify it in the rootfile name and a longer description for labels
-#define _NDet_ 4
-//std::string DetVers[_NDet_] = {"B1.0-P1.0-N1.0_v0.1", "B1.0-P5.0-N5.0_v0.1", "B1.0-P2.0-N2.0_v0.1", "B1.0-P6.0-N6.0_v0.1" }; 
-//const char *DetectorFullName[_NDet_] = {"Nominal (No Endcap GEMS)","One Endcap GEM Disk","Two Endcap GEM Disks", "Three Endcap GEM Disks"};
-std::string DetVers[_NDet_] = {"B1.0-P4.0-N4.0_v0.1", "B1.0-P1.0-N1.0_v0.1", "B1.0-P3.0-N3.0_v0.1", "B1.0-P2.0-N2.0_v0.1" }; 
-const char *DetectorFullName[_NDet_] = {"No GEMS" ,"Nominal (No Endcap GEMS)","Two Endcap GEM Disks, No Far Forward/Backward Disks", "Two Endcap GEM Disks with Forward/Backward Disks"};
+#define _NDet_ 1
+std::string DetVers[_NDet_] = {"BaselineHybrid"};
+//std::string DetVers[_NDet_] = {"Nominal_OrigRes"};
+//std::string DetVers[_NDet_] = {"Nominal_OrigResPt"};
+//std::string DetVers[_NDet_] = {"NominalNoAlSupp_OrigRes"};
+//std::string DetVers[_NDet_] = {"NominalNoAlSupp_OrigResPt"};
+//std::string DetVers[_NDet_] = {"Nominal_HighRes"};
+//std::string DetVers[_NDet_] = {"Inner_OrigRes"};
+//std::string DetVers[_NDet_] = {"Inner_HighResInner"};
+//std::string DetVers[_NDet_] = {"Inner_HighResBoth"};
+const char *DetectorFullName[_NDet_] = {"Hybrid Tracker"};
+
+//#define _NDet_ 2
+//std::string DetVers[_NDet_] = {"Nominal_OrigRes", "Nominal_HighRes"};
+//const char *DetectorFullName[_NDet_] = {"Nominal - Original Resolution GEMs", "Nominal - High Resolution GEMs"};
+
+//#define _NDet_ 3
+//std::string DetVers[_NDet_] = {"NominalNoAlSupp_OrigRes", "InnerNoAlSupp_OrigRes", "BigInnerNoAlSupp_OrigRes"};
+//const char *DetectorFullName[_NDet_] = {"Nominal - Original Resolution GEMs", "With Inner GEMs - Original Resolution GEMs", "With Large Inner GEMs - Original Resolution GEMs"};
+
+//#define _NDet_ 4
+//std::string DetVers[_NDet_] = {"NominalNoAlSupp_OrigRes", "Nominal_OrigRes", "InnerNoAlSupp_OrigRes", "Inner_OrigRes"};
+//const char *DetectorFullName[_NDet_] = {"Nominal - No Al Support", "Nominal - With Al Support", "With Inner GEMs - No Al Support", "With Inner GEMs - With Al Support"};
+
+
+//#define _NDet_ 3
+//std::string DetVers[_NDet_] = {"Nominal_OrigRes", "Inner_OrigRes", "Inner_HighResInner"};
+//const char *DetectorFullName[_NDet_] = {"Nominal - Original Resolution GEMs", "With Inner GEMs - Original Resolution GEMs", "With Inner GEMs - High Resolution Inner GEMs"};
+
+
 
 //make the first detector/field option in the array the version you want to be the reference set for the ratio
 #define _RATIOPLOT_ 0
@@ -89,9 +114,9 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 	TH1D *h_BACKThetaRes[_NDet_][_NBField_][_NEta_][_NP_], *h_BACKThetaRespt[_NDet_][_NBField_][_NEta_][_NP_];	
 	TH1D *h_BACKPhiRes[_NDet_][_NBField_][_NEta_][_NP_], *h_BACKPhiRespt[_NDet_][_NBField_][_NEta_][_NP_];
 
-	TH1D *h_MIDRICHPointRes[_NDet_][_NBField_][_NEta_][_NP_], *h_MIDRICHPointRespt[_NDet_][_NBField_][_NEta_][_NP_];	
-	TH1D *h_MIDRICHThetaRes[_NDet_][_NBField_][_NEta_][_NP_], *h_MIDRICHThetaRespt[_NDet_][_NBField_][_NEta_][_NP_];	
-	TH1D *h_MIDRICHPhiRes[_NDet_][_NBField_][_NEta_][_NP_], *h_MIDRICHPhiRespt[_NDet_][_NBField_][_NEta_][_NP_];	
+	TH1D *h_FOREXITPointRes[_NDet_][_NBField_][_NEta_][_NP_], *h_FOREXITPointRespt[_NDet_][_NBField_][_NEta_][_NP_];	
+	TH1D *h_FOREXITThetaRes[_NDet_][_NBField_][_NEta_][_NP_], *h_FOREXITThetaRespt[_NDet_][_NBField_][_NEta_][_NP_];	
+	TH1D *h_FOREXITPhiRes[_NDet_][_NBField_][_NEta_][_NP_], *h_FOREXITPhiRespt[_NDet_][_NBField_][_NEta_][_NP_];	
 
 	for (int iDet = 0; iDet < _NDet_; iDet++)
 	{
@@ -104,60 +129,65 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 					//Creating the histograms with unique names, these names will be used later to grab the proper histogram for analysis
 					h_momRes[iDet][iB][iEta][iP] = new TH1D(Form("h_momRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("dp/p for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 400, -0.15, 0.15);
 					h_ptRes[iDet][iB][iEta][iP] = new TH1D(Form("h_ptRes_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("dpt/pt for %0.2lf < pt < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 400, -0.15, 0.15);
-					h_nHits_momBin[iDet][iB][iEta][iP] = new TH2D(Form("h_nHits_MomentumBin_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf", DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Hits in each detector for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 5, 0, 5, 10, 0, 10);
-					h_nHits_ptBin[iDet][iB][iEta][iP] = new TH2D(Form("h_nHits_PtBin_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf", DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Hits in each detector for %0.2lf < pt < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 5, 0, 5, 10, 0, 10);
+					h_nHits_momBin[iDet][iB][iEta][iP] = new TH2D(Form("h_nHits_MomentumBin_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf", DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Hits in each detector for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 6, 0, 6, 10, 0, 10);
+					h_nHits_ptBin[iDet][iB][iEta][iP] = new TH2D(Form("h_nHits_PtBin_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf", DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Hits in each detector for %0.2lf < pt < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 6, 0, 6, 10, 0, 10);
 
-					h_dca2d[iDet][iB][iEta][iP] = new TH1D(Form("h_dca2d_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA2D for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -0.1, 0.1);
-					h_dca2dpt[iDet][iB][iEta][iP] = new TH1D(Form("h_dca2dpt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA2D for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -0.1, 0.1);
-					h_dcaZ[iDet][iB][iEta][iP] = new TH1D(Form("h_dcaZ_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA_z for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -0.1, 0.1);
-					h_dcaZpt[iDet][iB][iEta][iP] = new TH1D(Form("h_dcaZpt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA_z for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -0.1, 0.1);
+					double DCABINRANGE = 0.03;
+					double DCABINS = 600;
+
+					h_dca2d[iDet][iB][iEta][iP] = new TH1D(Form("h_dca2d_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA2D for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), DCABINS, -1*DCABINRANGE, DCABINRANGE);
+					h_dca2dpt[iDet][iB][iEta][iP] = new TH1D(Form("h_dca2dpt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA2D for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), DCABINS, -1*DCABINRANGE, DCABINRANGE);
+					h_dcaZ[iDet][iB][iEta][iP] = new TH1D(Form("h_dcaZ_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA_z for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), DCABINS, -1*DCABINRANGE, DCABINRANGE);
+					h_dcaZpt[iDet][iB][iEta][iP] = new TH1D(Form("h_dcaZpt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("DCA_z for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), DCABINS, -1*DCABINRANGE, DCABINRANGE);
 					
 					double PHIRANGE = 0.01;
 					double THETARANGE = 0.01;
-					double POINTRANGE = 0.8;
+					double POINTRANGE = 0.08;
 
-					h_DIRCPointRes[iDet][iB][iEta][iP] = new TH1D(Form("h_DIRCPointRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Pointing Resolution at DIRC for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*POINTRANGE, POINTRANGE);
-					h_DIRCPointRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_DIRCPointRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Pointing Resolution at DIRC for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*POINTRANGE, POINTRANGE);
+					h_DIRCPointRes[iDet][iB][iEta][iP] = new TH1D(Form("h_DIRCPointRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Pointing Resolution at DIRC for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, 0, POINTRANGE);
+					h_DIRCPointRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_DIRCPointRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Pointing Resolution at DIRC for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, 0, POINTRANGE);
 					h_DIRCThetaRes[iDet][iB][iEta][iP] = new TH1D(Form("h_DIRCThetaRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Theta Resolution at DIRC for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
 					h_DIRCThetaRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_DIRCThetaRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Theta Resolution at DIRC for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
 					h_DIRCPhiRes[iDet][iB][iEta][iP] = new TH1D(Form("h_DIRCPhiRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Phi Resolution at DIRC for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
 					h_DIRCPhiRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_DIRCPhiRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Phi Resolution at DIRC for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
 					
-					h_FORPointRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_FORPointRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Pointing Resolution at Hadron Calorimeter for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*POINTRANGE, POINTRANGE);
-					h_FORPointRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_FORPointRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Pointing Resolution at Hadron Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*POINTRANGE, POINTRANGE);
-					h_FORThetaRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_FORThetaRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),       Form("Theta Resolution at Hadron Calorimeter for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
-					h_FORThetaRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_FORThetaRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Theta Resolution at Hadron Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
-					h_FORPhiRes[iDet][iB][iEta][iP] = new TH1D(    Form("h_FORPhiRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),           Form("Phi Resolution at Hadron Calorimeter for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
-					h_FORPhiRespt[iDet][iB][iEta][iP] = new TH1D(  Form("h_FORPhiRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),        Form("Phi Resolution at Hadron Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
+					h_FORPointRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_FORPointRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Pointing Resolution at dRICH for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, 0, POINTRANGE);
+					h_FORPointRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_FORPointRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Pointing Resolution at dRICH for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, 0, POINTRANGE);
+					h_FORThetaRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_FORThetaRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),       Form("Theta Resolution at dRICH for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
+					h_FORThetaRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_FORThetaRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Theta Resolution at dRICH for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
+					h_FORPhiRes[iDet][iB][iEta][iP] = new TH1D(    Form("h_FORPhiRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),           Form("Phi Resolution at dRICH for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
+					h_FORPhiRespt[iDet][iB][iEta][iP] = new TH1D(  Form("h_FORPhiRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),        Form("Phi Resolution at dRICH for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
 					
-					h_BACKPointRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_BACKPointRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Pointing Resolution at EM Calorimeter for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*POINTRANGE, POINTRANGE);
-					h_BACKPointRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_BACKPointRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Pointing Resolution at EM Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*POINTRANGE, POINTRANGE);
-					h_BACKThetaRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_BACKThetaRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),       Form("Theta Resolution at EM Calorimeter for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
-					h_BACKThetaRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_BACKThetaRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Theta Resolution at EM Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
-					h_BACKPhiRes[iDet][iB][iEta][iP] = new TH1D(    Form("h_BACKPhiRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),           Form("Phi Resolution at EM Calorimeter for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
-					h_BACKPhiRespt[iDet][iB][iEta][iP] = new TH1D(  Form("h_BACKPhiRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),        Form("Phi Resolution at EM Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
+					h_BACKPointRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_BACKPointRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Pointing Resolution at mRICH for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, 0, POINTRANGE);
+					h_BACKPointRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_BACKPointRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Pointing Resolution at mRICH for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, 0, POINTRANGE);
+					h_BACKThetaRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_BACKThetaRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),       Form("Theta Resolution at mRICH for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
+					h_BACKThetaRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_BACKThetaRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Theta Resolution at mRICH for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
+					h_BACKPhiRes[iDet][iB][iEta][iP] = new TH1D(    Form("h_BACKPhiRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),           Form("Phi Resolution at mRICH for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
+					h_BACKPhiRespt[iDet][iB][iEta][iP] = new TH1D(  Form("h_BACKPhiRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),        Form("Phi Resolution at mRICH for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
 					
 					
-					h_MIDRICHPointRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_MIDRICHPointRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Pointing Resolution at Hadron Calorimeter for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*POINTRANGE, POINTRANGE);
-					h_MIDRICHPointRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_MIDRICHPointRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Pointing Resolution at Hadron Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*POINTRANGE, POINTRANGE);
-					h_MIDRICHThetaRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_MIDRICHThetaRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),       Form("Theta Resolution at Hadron Calorimeter for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
-					h_MIDRICHThetaRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_MIDRICHThetaRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Theta Resolution at Hadron Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
-					h_MIDRICHPhiRes[iDet][iB][iEta][iP] = new TH1D(    Form("h_MIDRICHPhiRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),           Form("Phi Resolution at Hadron Calorimeter for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
-					h_MIDRICHPhiRespt[iDet][iB][iEta][iP] = new TH1D(  Form("h_MIDRICHPhiRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),        Form("Phi Resolution at Hadron Calorimeter for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
+					h_FOREXITPointRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_FOREXITPointRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Pointing Resolution at dRICH Exit for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, 0, POINTRANGE);
+					h_FOREXITPointRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_FOREXITPointRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]), Form("Pointing Resolution at dRICH Exit for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, 0, POINTRANGE);
+					h_FOREXITThetaRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_FOREXITThetaRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),       Form("Theta Resolution at dRICH Exit for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
+					h_FOREXITThetaRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_FOREXITThetaRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Theta Resolution at dRICH Exit for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
+					h_FOREXITPhiRes[iDet][iB][iEta][iP] = new TH1D(    Form("h_FOREXITPhiRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),           Form("Phi Resolution at dRICH Exit for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
+					h_FOREXITPhiRespt[iDet][iB][iEta][iP] = new TH1D(  Form("h_FOREXITPhiRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),        Form("Phi Resolution at dRICH Exit for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
 					//setting names for the hit histogram
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(1,"Si Vtx");
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(2,"Si Barrel");
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(3,"Barrel MPGD Tracker");
-					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(4,"GEM Disks");
-					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(5,"Si Disks");
+					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(4,"Inner GEM Disks");
+					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(5,"Outer GEM Disks");
+					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(6,"Si Disks");
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetYaxis()->SetTitle("Hits");
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetTitle("Detector");
 
 					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(1,"Si Vtx");
 					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(2,"Si Barrel");
 					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(3,"Barrel MPGD Tracker");
-					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(4,"GEM Disks");
-					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(5,"Si Disks");
+					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(4,"Inner GEM Disks");
+					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(5,"Outer GEM Disks");
+					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(6,"Si Disks");
 					h_nHits_ptBin[iDet][iB][iEta][iP]->GetYaxis()->SetTitle("Hits");
 					h_nHits_ptBin[iDet][iB][iEta][iP]->GetXaxis()->SetTitle("Detector");
 
@@ -196,7 +226,8 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
    	Float_t         pcay;
    	Float_t         pcaz;
    	Float_t         dca2d;
-   	Int_t	   nHits_FGT;
+   	Int_t	   nHits_INNERGEM;
+   	Int_t	   nHits_OUTERGEM;
    	Int_t	   nHits_SVTX;
    	Int_t 	   nHits_FBST;
    	Int_t	   nHits_BARR;
@@ -243,20 +274,20 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 	Float_t	   BACK_px;
 	Float_t	   BACK_py;
 	Float_t	   BACK_pz;
-	Float_t	   MIDRICH_proj_x;
-	Float_t	   MIDRICH_proj_y;
-	Float_t	   MIDRICH_proj_z;
-	Float_t	   MIDRICH_proj_lt;
-	Float_t	   MIDRICH_proj_px;
-	Float_t	   MIDRICH_proj_py;
-	Float_t	   MIDRICH_proj_pz;
-	Float_t	   MIDRICH_x;
-	Float_t	   MIDRICH_y;
-	Float_t	   MIDRICH_z;
-	Float_t	   MIDRICH_lt;
-	Float_t	   MIDRICH_px;
-	Float_t	   MIDRICH_py;
-	Float_t	   MIDRICH_pz;
+	Float_t	   FOREXIT_proj_x;
+	Float_t	   FOREXIT_proj_y;
+	Float_t	   FOREXIT_proj_z;
+	Float_t	   FOREXIT_proj_lt;
+	Float_t	   FOREXIT_proj_px;
+	Float_t	   FOREXIT_proj_py;
+	Float_t	   FOREXIT_proj_pz;
+	Float_t	   FOREXIT_x;
+	Float_t	   FOREXIT_y;
+	Float_t	   FOREXIT_z;
+	Float_t	   FOREXIT_lt;
+	Float_t	   FOREXIT_px;
+	Float_t	   FOREXIT_py;
+	Float_t	   FOREXIT_pz;
 
 
 
@@ -302,7 +333,8 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 			   tree->SetBranchAddress("pcay", &pcay);
 			   tree->SetBranchAddress("pcaz", &pcaz);
 			   tree->SetBranchAddress("dca2d", &dca2d);
-			   tree->SetBranchAddress("nHit_G4HIT_FGT", &nHits_FGT);
+			   tree->SetBranchAddress("nHit_G4HIT_INNERGEM", &nHits_INNERGEM);
+			   tree->SetBranchAddress("nHit_G4HIT_OUTERGEM", &nHits_OUTERGEM);
 			   tree->SetBranchAddress("nHit_G4HIT_SVTX", &nHits_SVTX);
 			   tree->SetBranchAddress("nHit_G4HIT_FBST", &nHits_FBST);
 			   tree->SetBranchAddress("nHit_G4HIT_BARR", &nHits_BARR);
@@ -350,20 +382,20 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 			   tree->SetBranchAddress("BACK_px", &BACK_px);
 			   tree->SetBranchAddress("BACK_py", &BACK_py);
 			   tree->SetBranchAddress("BACK_pz", &BACK_pz);
-			   tree->SetBranchAddress("MIDRICH_proj_x", &MIDRICH_proj_x);
-			   tree->SetBranchAddress("MIDRICH_proj_y", &MIDRICH_proj_y);
-			   tree->SetBranchAddress("MIDRICH_proj_z", &MIDRICH_proj_z);
-			   tree->SetBranchAddress("MIDRICH_proj_t", &MIDRICH_proj_lt);
-			   tree->SetBranchAddress("MIDRICH_proj_px", &MIDRICH_proj_px);
-			   tree->SetBranchAddress("MIDRICH_proj_py", &MIDRICH_proj_py);
-			   tree->SetBranchAddress("MIDRICH_proj_pz", &MIDRICH_proj_pz);
-			   tree->SetBranchAddress("MIDRICH_x", &MIDRICH_x);
-			   tree->SetBranchAddress("MIDRICH_y", &MIDRICH_y);
-			   tree->SetBranchAddress("MIDRICH_z", &MIDRICH_z);
-			   tree->SetBranchAddress("MIDRICH_t", &MIDRICH_lt);
-			   tree->SetBranchAddress("MIDRICH_px", &MIDRICH_px);
-			   tree->SetBranchAddress("MIDRICH_py", &MIDRICH_py);
-			   tree->SetBranchAddress("MIDRICH_pz", &MIDRICH_pz);
+			   tree->SetBranchAddress("FOREXIT_proj_x", &FOREXIT_proj_x);
+			   tree->SetBranchAddress("FOREXIT_proj_y", &FOREXIT_proj_y);
+			   tree->SetBranchAddress("FOREXIT_proj_z", &FOREXIT_proj_z);
+			   tree->SetBranchAddress("FOREXIT_proj_t", &FOREXIT_proj_lt);
+			   tree->SetBranchAddress("FOREXIT_proj_px", &FOREXIT_proj_px);
+			   tree->SetBranchAddress("FOREXIT_proj_py", &FOREXIT_proj_py);
+			   tree->SetBranchAddress("FOREXIT_proj_pz", &FOREXIT_proj_pz);
+			   tree->SetBranchAddress("FOREXIT_x", &FOREXIT_x);
+			   tree->SetBranchAddress("FOREXIT_y", &FOREXIT_y);
+			   tree->SetBranchAddress("FOREXIT_z", &FOREXIT_z);
+			   tree->SetBranchAddress("FOREXIT_t", &FOREXIT_lt);
+			   tree->SetBranchAddress("FOREXIT_px", &FOREXIT_px);
+			   tree->SetBranchAddress("FOREXIT_py", &FOREXIT_py);
+			   tree->SetBranchAddress("FOREXIT_pz", &FOREXIT_pz);
 
 
 			// run the "analysis" simply getting tracks and filling the residual histograms
@@ -382,8 +414,8 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 				TVector3 FORProjPos(FOR_proj_x, FOR_proj_y, FOR_proj_z);
 				TVector3 BACKPos(BACK_x, BACK_y, BACK_z);
 				TVector3 BACKProjPos(BACK_proj_x, BACK_proj_y, BACK_proj_z);
-				TVector3 MIDRICHPos(MIDRICH_x, MIDRICH_y, MIDRICH_z);
-				TVector3 MIDRICHProjPos(MIDRICH_proj_x, MIDRICH_proj_y, MIDRICH_proj_z);
+				TVector3 FOREXITPos(FOREXIT_x, FOREXIT_y, FOREXIT_z);
+				TVector3 FOREXITProjPos(FOREXIT_proj_x, FOREXIT_proj_y, FOREXIT_proj_z);
 				//hits and projections of tracks 
 				TVector3 DIRCMom(DIRC_px, DIRC_py, DIRC_pz);
 				TVector3 DIRCProjMom(DIRC_proj_px, DIRC_proj_py, DIRC_proj_pz);
@@ -391,8 +423,8 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 				TVector3 FORProjMom(FOR_proj_px, FOR_proj_py, FOR_proj_pz);
 				TVector3 BACKMom(BACK_px, BACK_py, BACK_pz);
 				TVector3 BACKProjMom(BACK_proj_px, BACK_proj_py, BACK_proj_pz);
-				TVector3 MIDRICHMom(MIDRICH_px, MIDRICH_py, MIDRICH_pz);
-				TVector3 MIDRICHProjMom(MIDRICH_proj_px, MIDRICH_proj_py, MIDRICH_proj_pz);
+				TVector3 FOREXITMom(FOREXIT_px, FOREXIT_py, FOREXIT_pz);
+				TVector3 FOREXITProjMom(FOREXIT_proj_px, FOREXIT_proj_py, FOREXIT_proj_pz);
 				//Loop over eta as to store information in the properly indexed histogram
 				for (int iEta = 0; iEta < _NEta_; iEta++)
 				{
@@ -436,11 +468,11 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 										h_BACKPhiRes[iDet][iB][iEta][iP]->Fill(BACKMom.Phi() - BACKProjMom.Phi());
 									}	
 									
-									if (MIDRICHPos.Mag() < 17318)
+									if (FOREXITPos.Mag() < 17318)
 									{
-										h_MIDRICHPointRes[iDet][iB][iEta][iP]->Fill( (MIDRICHPos-MIDRICHProjPos).Mag() );				
-										h_MIDRICHThetaRes[iDet][iB][iEta][iP]->Fill(MIDRICHMom.Theta() - MIDRICHProjMom.Theta());
-										h_MIDRICHPhiRes[iDet][iB][iEta][iP]->Fill(MIDRICHMom.Phi() - MIDRICHProjMom.Phi());
+										h_FOREXITPointRes[iDet][iB][iEta][iP]->Fill( (FOREXITPos-FOREXITProjPos).Mag() );				
+										h_FOREXITThetaRes[iDet][iB][iEta][iP]->Fill(FOREXITMom.Theta() - FOREXITProjMom.Theta());
+										h_FOREXITPhiRes[iDet][iB][iEta][iP]->Fill(FOREXITMom.Phi() - FOREXITProjMom.Phi());
 									}
 									
 
@@ -448,8 +480,9 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(0., nHits_SVTX);
 									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(1., nHits_BARR);
 									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(2., nHits_BMT);
-									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(3., nHits_FGT);
-									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(4., nHits_FBST);
+									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(3., nHits_INNERGEM);
+									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(4., nHits_OUTERGEM);
+									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(5., nHits_FBST);
 								
 									eff[iDet][iB][iEta][iP] += 1;	
 									h_dca2d[iDet][iB][iEta][iP]->Fill(dca2d);
@@ -475,37 +508,38 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 									if (DIRCPos.Mag() < 17318)
 									{
 										h_DIRCPointRespt[iDet][iB][iEta][iP]->Fill(CylS);
-										h_DIRCThetaRespt[iDet][iB][iEta][iP]->Fill(DIRCPos.Theta() - DIRCProjPos.Theta());
-										h_DIRCPhiRespt[iDet][iB][iEta][iP]->Fill(dPhi);	
+										h_DIRCThetaRespt[iDet][iB][iEta][iP]->Fill(DIRCMom.Theta() - DIRCProjMom.Theta());
+										h_DIRCPhiRespt[iDet][iB][iEta][iP]->Fill(DIRCMom.Phi() - DIRCProjMom.Phi());	
 									}
 									
 									if (FORPos.Mag() < 17318)
 									{
-										h_FORPointRespt[iDet][iB][iEta][iP]->Fill( (DIRCPos-DIRCProjPos).Mag() );	
-										h_FORThetaRespt[iDet][iB][iEta][iP]->Fill(DIRCPos.Theta() - DIRCProjPos.Theta());
-										h_FORPhiRespt[iDet][iB][iEta][iP]->Fill(dPhi);
+										h_FORPointRespt[iDet][iB][iEta][iP]->Fill( (FORPos-FORProjPos).Mag() );	
+										h_FORThetaRespt[iDet][iB][iEta][iP]->Fill(FORMom.Theta() - FORProjMom.Theta());
+										h_FORPhiRespt[iDet][iB][iEta][iP]->Fill(FORMom.Phi() - FORProjMom.Phi());
 									}
 
 									if (BACKPos.Mag() < 17318)
 									{
-										h_BACKPointRespt[iDet][iB][iEta][iP]->Fill( (DIRCPos-DIRCProjPos).Mag() );	
-										h_BACKThetaRespt[iDet][iB][iEta][iP]->Fill(DIRCPos.Theta() - DIRCProjPos.Theta());
-										h_BACKPhiRespt[iDet][iB][iEta][iP]->Fill(dPhi);				
+										h_BACKPointRespt[iDet][iB][iEta][iP]->Fill( (BACKPos-BACKProjPos).Mag() );	
+										h_BACKThetaRespt[iDet][iB][iEta][iP]->Fill(BACKMom.Theta() - BACKProjMom.Theta());
+										h_BACKPhiRespt[iDet][iB][iEta][iP]->Fill(BACKMom.Phi() - BACKProjMom.Phi());				
 									}
 
-									if (MIDRICHPos.Mag() < 17318)
+									if (FOREXITPos.Mag() < 17318)
 									{
-										h_MIDRICHPointRespt[iDet][iB][iEta][iP]->Fill( (DIRCPos-DIRCProjPos).Mag() );	
-										h_MIDRICHThetaRespt[iDet][iB][iEta][iP]->Fill(DIRCPos.Theta() - DIRCProjPos.Theta());
-										h_MIDRICHPhiRespt[iDet][iB][iEta][iP]->Fill(dPhi);
+										h_FOREXITPointRespt[iDet][iB][iEta][iP]->Fill( (FOREXITPos-FOREXITProjPos).Mag() );	
+										h_FOREXITThetaRespt[iDet][iB][iEta][iP]->Fill(FOREXITMom.Theta() - FOREXITProjMom.Theta());
+										h_FOREXITPhiRespt[iDet][iB][iEta][iP]->Fill(FOREXITMom.Phi() - FOREXITProjMom.Phi());
 									}
 
 									h_ptRes[iDet][iB][iEta][iP]->Fill( (recoP.Pt() - truthP.Pt())/truthP.Pt());  
 									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(0., nHits_SVTX);
 									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(1., nHits_BARR);
 									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(2., nHits_BMT);
-									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(3., nHits_FGT);
-									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(4., nHits_FBST);
+									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(3., nHits_INNERGEM);
+									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(4., nHits_OUTERGEM);
+									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(5., nHits_FBST);
 									
 									effpt[iDet][iB][iEta][iP] += 1;	
 									h_dca2dpt[iDet][iB][iEta][iP]->Fill(dca2d);
@@ -557,12 +591,12 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 					h_BACKPhiRes[iDet][iB][iEta][iP]->Write();
 					h_BACKPhiRespt[iDet][iB][iEta][iP]->Write();
 					
-					h_MIDRICHPointRes[iDet][iB][iEta][iP]->Write();
-					h_MIDRICHPointRespt[iDet][iB][iEta][iP]->Write();
-					h_MIDRICHThetaRes[iDet][iB][iEta][iP]->Write();
-					h_MIDRICHThetaRespt[iDet][iB][iEta][iP]->Write();
-					h_MIDRICHPhiRes[iDet][iB][iEta][iP]->Write();
-					h_MIDRICHPhiRespt[iDet][iB][iEta][iP]->Write();
+					h_FOREXITPointRes[iDet][iB][iEta][iP]->Write();
+					h_FOREXITPointRespt[iDet][iB][iEta][iP]->Write();
+					h_FOREXITThetaRes[iDet][iB][iEta][iP]->Write();
+					h_FOREXITThetaRespt[iDet][iB][iEta][iP]->Write();
+					h_FOREXITPhiRes[iDet][iB][iEta][iP]->Write();
+					h_FOREXITPhiRespt[iDet][iB][iEta][iP]->Write();
 
 				}
 			}
@@ -579,8 +613,8 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 //Make the plots
 
 	//Strings used for getting histograms and labeling axes. Should be no need to change these unless a change is made to the Fun4All macro.
-	std::string ProjectionLocation[4] = {"DIRC", "FOR" , "BACK", "MIDRICH"};
-	std::string LocationFullName[4] = {"DIRC", "dRICH Entrance" , "mRICH Entrance" , "dRICH Gas Center"};
+	std::string ProjectionLocation[4] = {"DIRC", "FOR" , "BACK", "FOREXIT"};
+	std::string LocationFullName[4] = {"DIRC", "dRICH Entrance" , "mRICH Entrance" , "dRICH Exit"};
 	std::string ProjectionVariable[3] = {"Point", "Theta" , "Phi"};
 	std::string VariableFullName[3] = {"Pointing", "Theta" , "Phi"};
 
@@ -1092,6 +1126,57 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 	}
 
 
+	//Saving the individual fits to a pdf so they can be easily investigated in case of issues
+
+	TFile *HistInFile = new TFile("./Output/Histogram.root", "read");
+	TCanvas *cPS2 = new TCanvas("cPS2", "", 100, 100, 600, 800);
+
+
+	for (int iD = 0; iD < _NDet_; iD++)
+	{
+		for (int iB = 0; iB < _NBField_; iB++) 
+		{
+			TString SetupName = Form("%s_%s_Eta_%0.1lf-%0.1lf_P_%0.1lf-%0.1lf", DetVers[iD].c_str(), BField[iB].c_str(), EtaMin, EtaMax, PMin, PMax);
+			TPDF *ps2 = new TPDF(Form("./Plots/DetectorHits_%s.pdf", SetupName.Data()));
+			cPS->Clear();
+			cPS->Divide(2,3);
+			int padIndex = 1;
+			
+		  	for (int iP = 0; iP < _NP_; iP++)
+			{
+				for (int iA = 0; iA < _NEta_; iA++)
+		        	{
+					if (padIndex > 6)
+					{
+						cPS->Clear();
+						cPS->Divide(2,3);
+						padIndex = 1;
+					}
+		        		//Construct Histo Name
+					TString HistName;
+					
+		
+					if (_PT_) HistName = Form("h_nHits_PtBin_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf", DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+					else HistName = Form("h_nHits_MomentumBin_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf", DetVers[iD].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1]);
+	
+					//Get Histogram
+		        		TH1D *Htmp = (TH1D*)HistInFile->Get(HistName);
+					cPS->cd(padIndex);
+			
+					//Edit Title?
+					if (_PT_) Htmp->SetTitle(Form(" %0.1lf < Pt < %0.1lf  &  %0.1lf < Eta < %0.1lf", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1] ));	
+					else Htmp->SetTitle(Form(" %0.1lf < P < %0.1lf  &  %0.1lf < Eta < %0.1lf", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iA], AngleValues[iA+1] ));	
+
+					Htmp->Draw("colz");
+					cPS->Update();
+					padIndex++;
+								
+				
+				}
+			}
+			ps2->Close();
+		}
+	}
 
 
 	cout << "DONE!" << endl;
