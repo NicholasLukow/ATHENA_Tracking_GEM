@@ -159,7 +159,7 @@ void Fun4All_G4_HybridGEM(
 	double projradius3 = 130.;               // [cm]
 	// ---
 	string projname4   = "FOREXIT";            // Backward plane object name
-	double projzpos4   = 304;// [cm]
+	double projzpos4   = 301;// [cm]
 	double projradius4 = 200.;               // [cm]
 	// ======================================================================================================
 	// Make the Server
