@@ -158,9 +158,9 @@ void Fun4All_G4_HybridGEM(
 	double projzpos3   = -(138+thinness/2.);// [cm]
 	double projradius3 = 130.;               // [cm]
 	// ---
-	string projname4   = "MIDRICH";            // Backward plane object name
-	double projzpos4   = 220;// [cm]
-	double projradius4 = 146.;               // [cm]
+	string projname4   = "FOREXIT";            // Backward plane object name
+	double projzpos4   = 304;// [cm]
+	double projradius4 = 200.;               // [cm]
 	// ======================================================================================================
 	// Make the Server
 	Fun4AllServer *se = Fun4AllServer::instance();
@@ -491,7 +491,7 @@ void Fun4All_G4_HybridGEM(
 	    	//array<double,6> Params = FullGEMParameters(1036.25, 0.95, 270, 12);
 	    	MakeGEM(Params, fgt);
  	    	Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
-	    	MakeGEM(Params, fgt);
+	    	//MakeGEM(Params, fgt);
  	    	Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    	MakeGEM(Params, fgt);
 		
@@ -500,7 +500,7 @@ void Fun4All_G4_HybridGEM(
 	    	//Params = FullGEMParameters(-1036.25, 0.95, 270, 12);
 	    	MakeGEM(Params, fgt);
 	    	Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
-	    	MakeGEM(Params, fgt); 
+	    	//MakeGEM(Params, fgt); 
 		Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
 		MakeGEM(Params, fgt); 
 
