@@ -738,7 +738,7 @@ void Fun4All_G4_HybridGEM(
 	#ifdef _TPC_
         // GridPix tracker hits;
         kalman->add_phg4hits(
-			     "GAS",
+			     "G4HIT_GAS",
                              PHG4TrackFastSim::Cylinder,
                              999., // radial-resolution [cm] (this number is not used in cylindrical geometry)                             
                              100e-4,        // azimuthal (arc-length) resolution [cm]    
