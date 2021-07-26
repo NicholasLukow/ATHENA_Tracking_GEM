@@ -44,6 +44,8 @@
 
 #include "G4_DIRC_SMALL.C"
 
+#include "G4_GridPix.C"
+
 #ifdef _EICTOYVST_
 #include <EicRootVstSubsystem.h>
 #include <EtmOrphans.h>
@@ -125,7 +127,7 @@ void Fun4All_G4_HybridGEM(
 			double etamin = -3.7,
 			double etamax = 3.7,
 			int generatorVersion = 1, 		// Generator setting
-			int magnetic_field = 5, 		// Magnetic field setting
+			int magnetic_field = 6, 		// Magnetic field setting
 			TString out_name = "TEST")	// output filename
 {	
 	// ======================================================================================================
@@ -297,6 +299,11 @@ void Fun4All_G4_HybridGEM(
 
 	#endif
 
+	#ifdef _TPC_
+	GridPixSetup(g4Reco);
+	#endif
+
+
 	#ifdef _SIVTX_
 	//---------------------------
 	// Vertexing
@@ -443,9 +450,19 @@ void Fun4All_G4_HybridGEM(
 
 
         PHG4CylinderStripSubsystem *example01;
-        const double prapidity =1.0;
-        double bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*80;
-        //double bmt_length = 250;
+        //double bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*80;
+        
+	//const double prapidity =1.1;
+        //double bmt_length_inner = (1-exp(-2*prapidity))/exp(-prapidity)*50;
+        //double bmt_length_outer = (1-exp(-2*prapidity))/exp(-prapidity)*78;
+        //double bmt_length;
+        
+	const double prapidity =1.0;
+        double bmt_length_inner, bmt_length_outer;
+	double bmt_length = bmt_length_inner = bmt_length_outer = (1-exp(-2*prapidity))/exp(-prapidity)*80;
+	//double bmt_length = 250;
+	cout << "Inner Length: " << bmt_length_inner << endl;
+	cout << "Outer Length: " << bmt_length_outer << endl;
 	cout << "BMT Length: " << bmt_length << endl;
         for (int ilayer = 0; ilayer< 6; ilayer++){
                 example01 = new PHG4CylinderStripSubsystem("BMT",ilayer);
@@ -457,7 +474,10 @@ void Fun4All_G4_HybridGEM(
                 example01->SetActive();
                 example01->SuperDetector("BMT");
                 example01->set_int_param("lengthviarapidity",0);
-                example01->set_double_param("length", bmt_length);
+                
+		if (ilayer < 2) bmt_length = bmt_length_inner;
+		else bmt_length = bmt_length_outer;
+		example01->set_double_param("length", bmt_length);
                 example01->set_double_param("deadzone", 0.2);
                 example01->set_int_param("nhit", 2);
                 example01->OverlapCheck(true);
@@ -485,7 +505,23 @@ void Fun4All_G4_HybridGEM(
 		
 		//FullGEMParameters() will calculate the parameters to define the geometry of the GEM disk based on the Z location, minimum eta coverage, inner radius clearance, and number of modules
 	        //Array definition: Params[] = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
-	    
+	   
+		//New Design for projective Central tracker with eta = 1.1
+	    	array<double,6> Params = FullGEMParameters(690, 1.2, 240, 12);
+		MakeGEM(Params, fgt);
+		Params = FullGEMParameters(1060, 1.2, 240, 12);
+		MakeGEM(Params, fgt);
+		Params = FullGEMParameters(1210, 1.2, 240, 12);
+		MakeGEM(Params, fgt);
+	    	
+		Params = FullGEMParameters(-690, 1.2, 240, 12);
+		MakeGEM(Params, fgt);
+		Params = FullGEMParameters(-1060, 1.2, 240, 12);
+		MakeGEM(Params, fgt);
+		Params = FullGEMParameters(-1210, 1.2, 240, 12);
+		MakeGEM(Params, fgt);
+
+/* 
 	    	//Hadron Endcap GEM Disks
 	    	array<double,6> Params = FullGEMParameters(1036.25, 1.2, 270, 12);
 	    	//array<double,6> Params = FullGEMParameters(1036.25, 0.95, 270, 12);
@@ -503,7 +539,7 @@ void Fun4All_G4_HybridGEM(
 	    	//MakeGEM(Params, fgt); 
 		Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
 		MakeGEM(Params, fgt); 
-
+*/
         
 		}
  	        g4Reco->registerSubsystem(fgt);
@@ -696,6 +732,18 @@ void Fun4All_G4_HybridGEM(
                              50e-4,        // azimuthal (arc-length) resolution [cm]    
                              999., //70e-4       // longitudinal (z) resolution [cm]                                                                   
                              1,// efficiency (fraction)                                                                        
+                             0);// hit noise   
+	#endif
+	
+	#ifdef _TPC_
+        // GridPix tracker hits;
+        kalman->add_phg4hits(
+			     "GAS",
+                             PHG4TrackFastSim::Cylinder,
+                             999., // radial-resolution [cm] (this number is not used in cylindrical geometry)                             
+                             100e-4,        // azimuthal (arc-length) resolution [cm]    
+                             200e-4, //70e-4       // longitudinal (z) resolution [cm]                                                                   
+                             0.9,// efficiency (fraction)                                                                        
                              0);// hit noise   
 	#endif
 
