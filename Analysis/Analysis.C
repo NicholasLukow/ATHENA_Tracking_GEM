@@ -9,8 +9,8 @@
 //Here are the only parameters that need changing for most analyses (others are changed in the arguments given... See shell script)
 //The following parts correspond to the different simulations you have run and want to process data for
 //Give the number of detector configurations as well as the name used to identify it in the rootfile name and a longer description for labels
-#define _NDet_ 1
-std::string DetVers[_NDet_] = {"BaselineHybrid"};
+//#define _NDet_ 1
+//std::string DetVers[_NDet_] = {"BaselineHybrid"};
 //std::string DetVers[_NDet_] = {"Nominal_OrigRes"};
 //std::string DetVers[_NDet_] = {"Nominal_OrigResPt"};
 //std::string DetVers[_NDet_] = {"NominalNoAlSupp_OrigRes"};
@@ -19,7 +19,7 @@ std::string DetVers[_NDet_] = {"BaselineHybrid"};
 //std::string DetVers[_NDet_] = {"Inner_OrigRes"};
 //std::string DetVers[_NDet_] = {"Inner_HighResInner"};
 //std::string DetVers[_NDet_] = {"Inner_HighResBoth"};
-const char *DetectorFullName[_NDet_] = {"Hybrid Tracker"};
+//const char *DetectorFullName[_NDet_] = {"Hybrid Tracker"};
 
 //#define _NDet_ 2
 //std::string DetVers[_NDet_] = {"Nominal_OrigRes", "Nominal_HighRes"};
@@ -29,16 +29,37 @@ const char *DetectorFullName[_NDet_] = {"Hybrid Tracker"};
 //std::string DetVers[_NDet_] = {"NominalNoAlSupp_OrigRes", "InnerNoAlSupp_OrigRes", "BigInnerNoAlSupp_OrigRes"};
 //const char *DetectorFullName[_NDet_] = {"Nominal - Original Resolution GEMs", "With Inner GEMs - Original Resolution GEMs", "With Large Inner GEMs - Original Resolution GEMs"};
 
-//#define _NDet_ 4
-//std::string DetVers[_NDet_] = {"NominalNoAlSupp_OrigRes", "Nominal_OrigRes", "InnerNoAlSupp_OrigRes", "Inner_OrigRes"};
-//const char *DetectorFullName[_NDet_] = {"Nominal - No Al Support", "Nominal - With Al Support", "With Inner GEMs - No Al Support", "With Inner GEMs - With Al Support"};
+//#define _NDet_ 6
+//std::string DetVers[_NDet_] = {"BaselineHybrid", "BaselineWithSupport", "Inner", "InnerWithSupport", "InnerOnly", "InnerOnlyWithSupport"};
+//const char *DetectorFullName[_NDet_] = {"Baseline", "Baseline - With Al Support", "Baseline + Inner GEMs", "Baseline + Inner GEMs - With Al Support", "Only Inner GEMs", "Only Inner GEMs - With Al Support"};
 
 
 //#define _NDet_ 3
-//std::string DetVers[_NDet_] = {"Nominal_OrigRes", "Inner_OrigRes", "Inner_HighResInner"};
-//const char *DetectorFullName[_NDet_] = {"Nominal - Original Resolution GEMs", "With Inner GEMs - Original Resolution GEMs", "With Inner GEMs - High Resolution Inner GEMs"};
+//std::string DetVers[_NDet_] = {"BaselineHybrid_WithSupport", "LowResBaselineHybridWithSupport", "HighResBaselineHybridWithSupport"};
+//const char *DetectorFullName[_NDet_] = {"Baseline", "Baseline - Low Res GEMs", "Baseline - High Res GEMs"};
+
+//#define _NDet_ 3
+//std::string DetVers[_NDet_] = {"BaselineHybrid_WithSupport", "ProjectiveHybrid_v1.0_WithSupport", "ProjectiveHybrid_v1.1_WithSupport"};
+//const char *DetectorFullName[_NDet_] = {"Original Baseline" ,"Version with Frame Edges above BMT Radii", "Version with Frame Edges flush with BMT Radii"};
+
+//#define _NDet_ 2
+//std::string DetVers[_NDet_] = {"BaselineHybrid_WithSupport", "BaselineHybrid"};
+//const char *DetectorFullName[_NDet_] = {"Baseline - With Support" , "Baseline - No Support"};
+
+#define _NDet_ 1
+//std::string DetVers[_NDet_] = {"BaselineHybrid_WithSupport"};//, "BaselineHybrid"};
+//const char *DetectorFullName[_NDet_] = {"Baseline - With Support"};// , "Baseline - No Support"};
+std::string DetVers[_NDet_] = {"BaselineHybrid"};
+const char *DetectorFullName[_NDet_] = {"Baseline - No Support"};
+
+//#define _NDet_ 3
+//std::string DetVers[_NDet_] = {"BaselineHybrid", "GridPixTPC_NoBeamPipeClearance", "GridPixTPC"};
+//const char *DetectorFullName[_NDet_] = {"Baseline","GridPix Original", "Modified GridPix" };
 
 
+//#define _NDet_ 2
+//std::string DetVers[_NDet_] = {"BaselineHybrid_WithSupport", "BaselineWithSupport"};
+//const char *DetectorFullName[_NDet_] = {"Original Baseline","Old Simu" };
 
 //make the first detector/field option in the array the version you want to be the reference set for the ratio
 #define _RATIOPLOT_ 0
@@ -50,6 +71,9 @@ const char *DetectorFullName[_NDet_] = {"Hybrid Tracker"};
 //const char *FieldMapName[_NBField_] = {"05-28 BeAST Field Map Update", "05-07 BeAST Field Map Update", "Original BeAST Field Map", "Uniform 3.0T"};
 std::string BField[_NBField_] = { "ATHENA0507"};
 const char *FieldMapName[_NBField_] = {"ATHENA"};
+
+//std::string BField[_NBField_] = { "ATHENA0507", "ATHENA0528"};
+//const char *FieldMapName[_NBField_] = {"May 7 Field Map", "May 28 Field Map"};
 
 //The maximum value for the y-axis. This will automatically be increased to be larger than the largest y-value if it is set too low
 double ymax =  1.5;
@@ -117,6 +141,9 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 	TH1D *h_FOREXITPointRes[_NDet_][_NBField_][_NEta_][_NP_], *h_FOREXITPointRespt[_NDet_][_NBField_][_NEta_][_NP_];	
 	TH1D *h_FOREXITThetaRes[_NDet_][_NBField_][_NEta_][_NP_], *h_FOREXITThetaRespt[_NDet_][_NBField_][_NEta_][_NP_];	
 	TH1D *h_FOREXITPhiRes[_NDet_][_NBField_][_NEta_][_NP_], *h_FOREXITPhiRespt[_NDet_][_NBField_][_NEta_][_NP_];	
+	
+	TH1D *h_VTXThetaRes[_NDet_][_NBField_][_NEta_][_NP_], *h_VTXThetaRespt[_NDet_][_NBField_][_NEta_][_NP_];	
+	TH1D *h_VTXPhiRes[_NDet_][_NBField_][_NEta_][_NP_], *h_VTXPhiRespt[_NDet_][_NBField_][_NEta_][_NP_];	
 
 	for (int iDet = 0; iDet < _NDet_; iDet++)
 	{
@@ -172,6 +199,12 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 					h_FOREXITThetaRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_FOREXITThetaRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Theta Resolution at dRICH Exit for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
 					h_FOREXITPhiRes[iDet][iB][iEta][iP] = new TH1D(    Form("h_FOREXITPhiRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),           Form("Phi Resolution at dRICH Exit for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
 					h_FOREXITPhiRespt[iDet][iB][iEta][iP] = new TH1D(  Form("h_FOREXITPhiRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),        Form("Phi Resolution at dRICH Exit for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
+					
+					h_VTXThetaRes[iDet][iB][iEta][iP] = new TH1D(  Form("h_VTXThetaRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),       Form("Theta Resolution at Vertex for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
+					h_VTXThetaRespt[iDet][iB][iEta][iP] = new TH1D(Form("h_VTXThetaRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),    Form("Theta Resolution at Vertex for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*THETARANGE, THETARANGE);
+					h_VTXPhiRes[iDet][iB][iEta][iP] = new TH1D(    Form("h_VTXPhiRes_%s_%s_P_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),           Form("Phi Resolution at Vertex for %0.2lf < p < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
+					h_VTXPhiRespt[iDet][iB][iEta][iP] = new TH1D(  Form("h_VTXPhiRespt_%s_%s_Pt_%0.2lf_%0.2lf_Eta_%0.2lf_%0.2lf",DetVers[iDet].c_str(), BField[iB].c_str(), MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1]),        Form("Phi Resolution at Vertex for %0.2lf < p_t < %0.2lf and %0.2lf < #eta < %0.2lf - Detector: %s  Field Map: %s", MomentumValues[iP], MomentumValues[iP+1], AngleValues[iEta], AngleValues[iEta+1], DetectorFullName[iDet], FieldMapName[iB]), 1000, -1*PHIRANGE, PHIRANGE);
+					
 					//setting names for the hit histogram
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(1,"Si Vtx");
 					h_nHits_momBin[iDet][iB][iEta][iP]->GetXaxis()->SetBinLabel(2,"Si Barrel");
@@ -475,6 +508,9 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 										h_FOREXITPhiRes[iDet][iB][iEta][iP]->Fill(FOREXITMom.Phi() - FOREXITProjMom.Phi());
 									}
 									
+									h_VTXThetaRes[iDet][iB][iEta][iP]->Fill(truthP.Theta() - recoP.Theta());
+									h_VTXPhiRes[iDet][iB][iEta][iP]->Fill(truthP.Phi() - recoP.Phi());
+
 
 									h_momRes[iDet][iB][iEta][iP]->Fill( (recoP.Mag() - truthP.Mag())/truthP.Mag());  
 									h_nHits_momBin[iDet][iB][iEta][iP]->Fill(0., nHits_SVTX);
@@ -532,6 +568,8 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 										h_FOREXITThetaRespt[iDet][iB][iEta][iP]->Fill(FOREXITMom.Theta() - FOREXITProjMom.Theta());
 										h_FOREXITPhiRespt[iDet][iB][iEta][iP]->Fill(FOREXITMom.Phi() - FOREXITProjMom.Phi());
 									}
+									h_VTXThetaRespt[iDet][iB][iEta][iP]->Fill(truthP.Theta() - recoP.Theta());
+									h_VTXPhiRespt[iDet][iB][iEta][iP]->Fill(truthP.Phi() - recoP.Phi());
 
 									h_ptRes[iDet][iB][iEta][iP]->Fill( (recoP.Pt() - truthP.Pt())/truthP.Pt());  
 									h_nHits_ptBin[iDet][iB][iEta][iP]->Fill(0., nHits_SVTX);
@@ -597,6 +635,10 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 					h_FOREXITThetaRespt[iDet][iB][iEta][iP]->Write();
 					h_FOREXITPhiRes[iDet][iB][iEta][iP]->Write();
 					h_FOREXITPhiRespt[iDet][iB][iEta][iP]->Write();
+					h_VTXThetaRes[iDet][iB][iEta][iP]->Write();
+					h_VTXThetaRespt[iDet][iB][iEta][iP]->Write();
+					h_VTXPhiRes[iDet][iB][iEta][iP]->Write();
+					h_VTXPhiRespt[iDet][iB][iEta][iP]->Write();
 
 				}
 			}
@@ -613,8 +655,8 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 //Make the plots
 
 	//Strings used for getting histograms and labeling axes. Should be no need to change these unless a change is made to the Fun4All macro.
-	std::string ProjectionLocation[4] = {"DIRC", "FOR" , "BACK", "FOREXIT"};
-	std::string LocationFullName[4] = {"DIRC", "dRICH Entrance" , "mRICH Entrance" , "dRICH Exit"};
+	std::string ProjectionLocation[5] = {"DIRC", "FOR" , "BACK", "FOREXIT", "VTX"};
+	std::string LocationFullName[5] = {"DIRC", "dRICH Entrance" , "mRICH Entrance" , "dRICH Exit", "Vertex"};
 	std::string ProjectionVariable[3] = {"Point", "Theta" , "Phi"};
 	std::string VariableFullName[3] = {"Pointing", "Theta" , "Phi"};
 
@@ -1005,6 +1047,7 @@ void Analysis( int _NEta_ = 1, double EtaMin = 1, double EtaMax = 3.5, int _NP_ 
 	
 	     if (_NDet_ > 1 && _NBField_ == 1 ) legend->AddEntry(gResPlot[iPlot], Form("Detector Version: %s", DetectorFullName[iPlot]), "P");
 	     else if (_NBField_ > 1 && _NDet_ == 1) legend->AddEntry(gResPlot[iPlot], Form("FieldMap: %s", FieldMapName[iPlot]), "P");
+	     else if (_NBField_ > 1 && _NDet_ > 1) legend->AddEntry(gResPlot[iPlot], Form("%s - FieldMap: %s",DetectorFullName[iPlot/2], FieldMapName[iPlot%2]), "P");
 	     else legend->AddEntry(gResPlot[iPlot], "Resolution", "P");
 	}
 	
