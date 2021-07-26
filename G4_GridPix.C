@@ -22,7 +22,9 @@ namespace G4GRIDPIX
   double kapton_X0 = 28.57; //cm
   double cage_thickness = cage_X0*kapton_X0;
   double cathod_thickness = cathod_X0*kapton_X0;
-  
+
+  double beampipe_clearance = 3.64; 
+ 
   int n_gas_layers = 125; //14 cm drift
   //int gas_layers = 180; //20 cm drift
   double inner_radius = 23.5;
@@ -91,9 +93,9 @@ void GridPixSetup(PHG4Reco *g4Reco)
   double readout_length = readout_Si_thickness;
 
   cyl = new PHG4CylinderSubsystem("READOUT", 0);
-  cyl->set_double_param("radius", 0);
+  cyl->set_double_param("radius", G4GRIDPIX::beampipe_clearance);
   cyl->set_string_param("material", "G4_Si");
-  cyl->set_double_param("thickness",radius);
+  cyl->set_double_param("thickness",radius- G4GRIDPIX::beampipe_clearance);
   cyl->set_double_param("length",readout_length);
   cyl->set_double_param("place_z",G4GRIDPIX::cage_length/2.0 + readout_Si_thickness/2.0);
   cyl->SuperDetector("READOUT");
@@ -103,9 +105,9 @@ void GridPixSetup(PHG4Reco *g4Reco)
 
   readout_length +=readout_FR4_thickness;
   cyl = new PHG4CylinderSubsystem("READOUT", 1);
-  cyl->set_double_param("radius", 0);
+  cyl->set_double_param("radius", G4GRIDPIX::beampipe_clearance);
   cyl->set_string_param("material", "FR4");
-  cyl->set_double_param("thickness",radius);
+  cyl->set_double_param("thickness",radius-G4GRIDPIX::beampipe_clearance);
   cyl->set_double_param("length",readout_length);
   //cyl->set_double_param("place_z",G4GRIDPIX::cage_length/2.0 + readout_Si_thickness + readout_FR4_thickness);
   cyl->set_double_param("place_z",G4GRIDPIX::cage_length/2.0 + readout_Si_thickness +readout_FR4_thickness);
@@ -115,9 +117,9 @@ void GridPixSetup(PHG4Reco *g4Reco)
   cyl->OverlapCheck();
 
   cyl = new PHG4CylinderSubsystem("CATHOD", 0);
-  cyl->set_double_param("radius", 0);
+  cyl->set_double_param("radius", G4GRIDPIX::beampipe_clearance);
   cyl->set_string_param("material", "G4_KAPTON");
-  cyl->set_double_param("thickness",radius);
+  cyl->set_double_param("thickness",radius - G4GRIDPIX::beampipe_clearance);
   cyl->set_double_param("length",G4GRIDPIX::cathod_thickness);
   cyl->set_double_param("place_z",-G4GRIDPIX::cage_length/2.0 - G4GRIDPIX::cage_thickness);
   cyl->SuperDetector("CATHOD");
@@ -125,6 +127,7 @@ void GridPixSetup(PHG4Reco *g4Reco)
   g4Reco->registerSubsystem(cyl);
   cyl->OverlapCheck();
 
+  return;	
 	
 }
 #endif
