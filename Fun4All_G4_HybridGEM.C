@@ -332,7 +332,14 @@ void Fun4All_G4_HybridGEM(
 	// Barrel
 	double si_r_pos[] = {13.38, 18.0};
 	const int nTrckLayers = sizeof(si_r_pos)/sizeof(*si_r_pos);
-	double si_z_length[] = {84.0, 84.0};
+        
+	//projective Si Barrel
+	double barr_prapidity = 1.05;
+	double si_barr_length_1 = (1-exp(-2*barr_prapidity))/exp(-barr_prapidity)*si_r_pos[0];
+	double si_barr_length_2 = (1-exp(-2*barr_prapidity))/exp(-barr_prapidity)*si_r_pos[1];
+	double si_z_length[] = {si_barr_length_1, si_barr_length_2};
+	
+	//double si_z_length[] = {84.0, 84.0};
 	//double si_thick_bar = barr_matBud/100.*9.37;
 	double si_thick_bar = 0.55/100.*9.37;
 
@@ -361,8 +368,12 @@ void Fun4All_G4_HybridGEM(
  */
   	double si_z_pos[] = {-121., -96.25, -71.5, -46.75, -22.0, 22.0, 46.75, 71.5, 96.25, 121.};
   	const int nDisks = sizeof(si_z_pos)/sizeof(*si_z_pos);
-  	double si_r_max[] = {19.0, 19.0, 19.0, 19.0, 7.13, 7.13, 19.0, 19.0, 19.0, 19.0};
-  	double si_r_min[] = {9.93, 7.25, 4.65, 3.64, 3.64, 3.64, 3.64, 4.65, 7.25, 9.93};
+  	//double si_r_max[] = {19.0, 19.0, 19.0, 19.0, 7.13, 7.13, 19.0, 19.0, 19.0, 19.0};
+  	
+	//projective Si Disk (only first disk changes)
+	double si_r_max[] = {19.0, 19.0, 19.0, 19.0, 16.47, 16.47, 19.0, 19.0, 19.0, 19.0};
+  	
+	double si_r_min[] = {9.93, 7.25, 4.65, 3.64, 3.64, 3.64, 3.64, 4.65, 7.25, 9.93};
   	double si_thick_disk = 0.24/100.*9.37;
 
  	for (int ilayer = 0; ilayer < nDisks ; ilayer++){
@@ -395,6 +406,8 @@ void Fun4All_G4_HybridGEM(
 	const int nTrckLayers = sizeof(si_r_pos)/sizeof(*si_r_pos);
 	double si_z_length[] = {27.0, 27.0, 54.0, 54.0}; //Simplified Toy Model
 	double si_thick_bar = 0.55/100.*9.37;
+	
+
 
 	for (int ilayer = 0; ilayer < nTrckLayers ; ilayer++){
 		cyl = new PHG4CylinderSubsystem("BARR", ilayer);
@@ -452,14 +465,14 @@ void Fun4All_G4_HybridGEM(
         PHG4CylinderStripSubsystem *example01;
         //double bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*80;
         
-	//const double prapidity =1.1;
-        //double bmt_length_inner = (1-exp(-2*prapidity))/exp(-prapidity)*50;
-        //double bmt_length_outer = (1-exp(-2*prapidity))/exp(-prapidity)*78;
-        //double bmt_length;
+	const double prapidity =1.1;
+        double bmt_length_inner = (1-exp(-2*prapidity))/exp(-prapidity)*50;
+        double bmt_length_outer = (1-exp(-2*prapidity))/exp(-prapidity)*78;
+        double bmt_length;
         
-	const double prapidity =1.0;
-        double bmt_length_inner, bmt_length_outer;
-	double bmt_length = bmt_length_inner = bmt_length_outer = (1-exp(-2*prapidity))/exp(-prapidity)*80;
+	//const double prapidity =1.0;
+        //double bmt_length_inner, bmt_length_outer;
+	//double bmt_length = bmt_length_inner = bmt_length_outer = (1-exp(-2*prapidity))/exp(-prapidity)*80;
 	//double bmt_length = 250;
 	cout << "Inner Length: " << bmt_length_inner << endl;
 	cout << "Outer Length: " << bmt_length_outer << endl;
@@ -505,7 +518,7 @@ void Fun4All_G4_HybridGEM(
 		
 		//FullGEMParameters() will calculate the parameters to define the geometry of the GEM disk based on the Z location, minimum eta coverage, inner radius clearance, and number of modules
 	        //Array definition: Params[] = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
-	   
+/*	   
 		//New Design for projective Central tracker with eta = 1.1
 	    	array<double,6> Params = FullGEMParameters(690, 1.2, 240, 12);
 		MakeGEM(Params, fgt);
@@ -520,8 +533,8 @@ void Fun4All_G4_HybridGEM(
 		MakeGEM(Params, fgt);
 		Params = FullGEMParameters(-1210, 1.2, 240, 12);
 		MakeGEM(Params, fgt);
-
-/* 
+*/
+ 
 	    	//Hadron Endcap GEM Disks
 	    	array<double,6> Params = FullGEMParameters(1036.25, 1.2, 270, 12);
 	    	//array<double,6> Params = FullGEMParameters(1036.25, 0.95, 270, 12);
@@ -539,7 +552,7 @@ void Fun4All_G4_HybridGEM(
 	    	//MakeGEM(Params, fgt); 
 		Params[4]=Params[4]-50; //Copying previous parameters but shifting in Z
 		MakeGEM(Params, fgt); 
-*/
+
         
 		}
  	        g4Reco->registerSubsystem(fgt);
