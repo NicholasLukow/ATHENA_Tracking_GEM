@@ -59,8 +59,8 @@ void Al_support_Detector::Print(const std::string &what) const
 // ======================================================================================================
 void  Al_support_Detector::addDetectorSection( G4LogicalVolume *logicWorld , std::string name , double sign){
 
-	double z_det[3] = {20.,46.75, 121.};
-        double rin  [3] = {7.13 * 20.0 / 22.0, 19.0,19.0};
+	double z_det[3] = {20.,25.375, 121.};
+        double rin  [3] = {16.47 * 20.0 / 22.0, 19.0,19.0};
 	double rout [3] = {0};
 	const int nzplanes = sizeof(z_det)/sizeof(*z_det);
 	for(int i = 0 ; i < nzplanes ; i++){
