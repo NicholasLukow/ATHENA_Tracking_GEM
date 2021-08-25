@@ -4,7 +4,7 @@
 ================================================================================================================
 */
 #pragma once
-#include "/eic/u/lukown/Simulations/WorkingDirectory/detector_setup.h"
+#include "detector_setup.h"
 #include <phgenfit/Track.h>
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -30,7 +30,8 @@
 #include <phool/recoConsts.h>
 #include <g4lblvtx/PHG4ParticleGenerator_flat_pT.h>
 //#include <g4lblvtx/AllSi_Al_support_Subsystem.h>
-#include <g4lblvtx/EicFRichSubsystem.h>
+//#include <g4lblvtx/EicFRichSubsystem.h>
+#include <g4_modifieddrich/EicFRichSubsystem.h>
 #include "G4_BlackHole.C"
 
 
@@ -39,6 +40,7 @@
 
 
 
+#include <g4mrich/PHG4mRICHSubsystem.h>
 
 
 #include "G4_Pipe_EIC.C"
@@ -150,22 +152,22 @@ void Fun4All_G4_ProjectiveHybrid(
 	double pix_size_bar = 10.; // um - size of pixels in barrel layers
 	double pix_size_dis = 10.; // um - size of pixels in disk layers
 	const int nDisks_per_side = 5;
-	const int do_projections =  1;
+	const int do_projections =  0;
 	// Parameters for projections
 	string projname1   = "DIRC";            // Cylindrical surface object name
-	double projradius1 = 100;//112;// 80.;               // [cm] 
+	double projradius1 = 95;// 100;//112;// 80.;               // [cm] 
 	//NOTE: these surfaces are black holes. Care must be taken in the choice of dimensions as to not absorb particles within the acceptance of other detectors
-	double length1     = 290; //200.;              // [cm]
+	double length1     = 310; //200.;              // [cm]
 	// ---
 	double thinness    = 0.01;               // black hole thickness, needs to be taken into account for the z positions
 	// ---
 	string projname2   = "FOR";             // Forward plane object name
-	double projzpos2   = 146+thinness/2;//315+thinness/2.;   // [cm]
-	double projradius2 = 100;//210.;               // [cm]
+	double projzpos2   = 155+thinness/2;//315+thinness/2.;   // [cm]
+	double projradius2 = 95;//210.;               // [cm]
 	// ---
 	string projname3   = "BACK";            // Backward plane object name
-	double projzpos3   = -(146+thinness/2.);// [cm]
-	double projradius3 = 100.;               // [cm]
+	double projzpos3   = -(137+thinness/2.);// [cm]
+	double projradius3 = 95.;               // [cm]
 	// ---
 	string projname4   = "FOREXIT";            // Backward plane object name
 	double projzpos4   = 301;// [cm]
@@ -345,6 +347,8 @@ void Fun4All_G4_ProjectiveHybrid(
 	double si_barr_length_1 = (1-exp(-2*barr_prapidity))/exp(-barr_prapidity)*si_r_pos[0];
 	double si_barr_length_2 = (1-exp(-2*barr_prapidity))/exp(-barr_prapidity)*si_r_pos[1];
 	double si_z_length[] = {si_barr_length_1, si_barr_length_2};
+
+	cout << "LENGTHS OF SI BARR: " << si_barr_length_1 << " , " << si_barr_length_2 << endl;
 	
 	//double si_z_length[] = {84.0, 84.0};
 	//double si_thick_bar = barr_matBud/100.*9.37;
@@ -374,7 +378,15 @@ void Fun4All_G4_ProjectiveHybrid(
  	double si_r_min[] = {9.93, 8.35, 6.67, 4.99, 3.64, 3.64, 3.64, 3.64, 3.64, 3.64, 4.99, 6.67, 8.35, 9.93};
  */
   	//double si_z_pos[] = {-121., -96.25, -71.5, -46.75, -22.0, 22.0, 46.75, 71.5, 96.25, 121.};
-  	double si_z_pos[] = {-121., -99., -77., -55., -33.0, 33.0, 55., 77., 99., 121.};
+  	
+	//expanded spacing 
+	//double si_z_pos[] = {-143., -115.5, -88., -60.5, -33, 33, 60.5, 88, 115.5, 143 };
+	
+	//Asymmetric expanded spacing 
+	double si_z_pos[] = {-135., -109.5, -84., -58.5, -33, 33, 63., 93., 123., 153 };
+	
+	//original projective
+	//double si_z_pos[] = {-121., -99., -77., -55., -33.0, 33.0, 55., 77., 99., 121.};
   	const int nDisks = sizeof(si_z_pos)/sizeof(*si_z_pos);
   	//double si_r_max[] = {19.0, 19.0, 19.0, 19.0, 7.13, 7.13, 19.0, 19.0, 19.0, 19.0};
   	double si_r_max[nDisks];
@@ -449,10 +461,13 @@ void Fun4All_G4_ProjectiveHybrid(
 	#endif
 
 	#ifdef _RICH_
-
 	EicFRichSubsystem *RICH = new EicFRichSubsystem("RICH");
 	g4Reco->registerSubsystem(RICH);
+	#endif
 	
+	#ifdef _MRICH_
+	PHG4mRICHSubsystem *mRICH = new PHG4mRICHSubsystem("mRICH", 0);
+	g4Reco->registerSubsystem(mRICH);
 	#endif
 
 	//beampipe as implemented by Rey with slight modification
@@ -477,15 +492,26 @@ void Fun4All_G4_ProjectiveHybrid(
   //double BMT_r[6] = {20., 20.+nCZlayer*thicknessMPGD+gap_betweenCZ+Gap_betweenlayer, 50-nCZlayer*thicknessMPGD-gap_betweenCZ-Gap_betweenlayer/2, 50\
 +Gap_betweenlayer/2, 80-(nCZlayer*thicknessMPGD+gap_betweenCZ)*2-Gap_betweenlayer, 80-nCZlayer*thicknessMPGD-gap_betweenCZ};                          
   	double BMT_r[6] = {    47.7153, 49.5718, 71.8958, 73.7523, 75.6088, 77.4653  };
-  	//double BMT_r[4] = {   71.8958, 73.7523, 75.6088, 77.4653  };
+  	
+	for (int iScale = 0; iScale < 6; iScale++)
+	{
+		BMT_r[iScale] = BMT_r[iScale]*1.2;
+	}
+
+	//double BMT_r[4] = {   71.8958, 73.7523, 75.6088, 77.4653  };
 
 
         PHG4CylinderStripSubsystem *example01;
         //double bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*80;
         
 	const double prapidity =1.1;
-        double bmt_length_inner = (1-exp(-2*prapidity))/exp(-prapidity)*50 - 10;
-        double bmt_length_outer = (1-exp(-2*prapidity))/exp(-prapidity)*78 - 15;
+        //Original projective
+	double bmt_length_inner = (1-exp(-2*prapidity))/exp(-prapidity)*BMT_r[0] ;
+        double bmt_length_outer = (1-exp(-2*prapidity))/exp(-prapidity)*BMT_r[2];
+        
+	//scale up
+	//double bmt_length_inner = (1-exp(-2*prapidity))/exp(-prapidity)*50*1.226 - 10;
+        //double bmt_length_outer = (1-exp(-2*prapidity))/exp(-prapidity)*78*1.226 - 17;
         double bmt_length;
         
 	//const double prapidity =1.0;
@@ -504,8 +530,9 @@ void Fun4All_G4_ProjectiveHybrid(
                 example01->SuperDetector("BMT");
                 example01->set_int_param("lengthviarapidity",0);
                 
-		if (ilayer < 2) bmt_length = bmt_length_inner;
-		else bmt_length = bmt_length_outer;
+		//if (ilayer < 2) bmt_length = bmt_length_inner;
+		//else bmt_length = bmt_length_outer;
+		bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*BMT_r[ilayer];
 		example01->set_double_param("length", bmt_length);
                 example01->set_double_param("deadzone", 0.2);
                 example01->set_int_param("nhit", 2);
@@ -536,20 +563,22 @@ void Fun4All_G4_ProjectiveHybrid(
 	        //Array definition: Params[] = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
 	   
 		//New Design for projective Central tracker with eta = 1.1
-	    	array<double,6> Params = FullGEMParameters(690, 1.25, 10*(RadiusFromZEta(69, 2.5)+2), 12);
+	    	array<double,6> Params = FullGEMParameters(690, 1.241, 10*(RadiusFromZEta(69, 2.5)+2), 12);
 		MakeGEM(Params, fgt);
-		Params = FullGEMParameters(1060, 1.25, 10*(RadiusFromZEta(106, 2.5)+2), 12);
+		Params = FullGEMParameters(1060, 1.208, 10*(RadiusFromZEta(106, 2.5)+2), 12);
 		MakeGEM(Params, fgt);
-		Params = FullGEMParameters(1430, 1.25, 10*(RadiusFromZEta(143, 2.5)+2), 12);
+		//Params = FullGEMParameters(1430, 1.25, 10*(RadiusFromZEta(143, 2.5)+2), 12);
+		Params = FullGEMParameters(1300, 1.197, 10*(RadiusFromZEta(130, 2.5)+2), 12);
 		MakeGEM(Params, fgt);
 	    
 
 			
-		Params = FullGEMParameters(-690, 1.25, 10*(RadiusFromZEta(69, 2.5)+2), 12);
+		Params = FullGEMParameters(-690, 1.241, 10*(RadiusFromZEta(69, 2.5)+2), 12);
 		MakeGEM(Params, fgt);
-		Params = FullGEMParameters(-1060, 1.25, 10*(RadiusFromZEta(106, 2.5)+2), 12);
+		Params = FullGEMParameters(-1060, 1.208, 10*(RadiusFromZEta(106, 2.5)+2), 12);
 		MakeGEM(Params, fgt);
-		Params = FullGEMParameters(-1430, 1.25, 10*(RadiusFromZEta(143, 2.5)+2), 12);
+		//Params = FullGEMParameters(-1430, 1.25, 10*(RadiusFromZEta(143, 2.5)+2), 12);
+		Params = FullGEMParameters(-1300, 1.197, 10*(RadiusFromZEta(130, 2.5)+2), 12);
 		MakeGEM(Params, fgt);
 		
 	
