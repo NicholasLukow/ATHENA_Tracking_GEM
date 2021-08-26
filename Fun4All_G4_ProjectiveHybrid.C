@@ -4,7 +4,7 @@
 ================================================================================================================
 */
 #pragma once
-#include "detector_setup.h"
+#include "/eic/u/lukown/Simulations/WorkingDirectory/detector_setup.h"
 #include <phgenfit/Track.h>
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -31,7 +31,7 @@
 #include <g4lblvtx/PHG4ParticleGenerator_flat_pT.h>
 //#include <g4lblvtx/AllSi_Al_support_Subsystem.h>
 //#include <g4lblvtx/EicFRichSubsystem.h>
-#include <g4_modifieddrich/EicFRichSubsystem.h>
+#include <g4_modifieddrich/dRICH_Subsystem.h>
 #include "G4_BlackHole.C"
 
 
@@ -113,7 +113,7 @@ void MakeGEM(array<double,6> Params, EicRootGemSubsystem *&fgt)
 //Function to calculate the parameters for GEM disk geometry given the Z position, minimum eta covered, inner radius clearance, and the number of modules
 array<double,6> FullGEMParameters(double Z, double EtaMin, double InnerRadius, double NModules)
 {
-	    double Height = TMath::Abs(Z)*TMath::Tan(2*TMath::ATan(TMath::Exp(-1*EtaMin))); 
+	    double Height = -50 + TMath::Abs(Z)*TMath::Tan(2*TMath::ATan(TMath::Exp(-1*EtaMin))); 
 	    double ActiveHeight = Height - InnerRadius; //NB: this may not account for the frame material thickness at the outer edge of the module, so it may not precisely get the full eta coverage
 	    double CenterRadius = 0.5*ActiveHeight + InnerRadius;
 	    double TopWidth = 2*Height*TMath::Tan(TMath::Pi()/NModules);
@@ -152,7 +152,7 @@ void Fun4All_G4_ProjectiveHybrid(
 	double pix_size_bar = 10.; // um - size of pixels in barrel layers
 	double pix_size_dis = 10.; // um - size of pixels in disk layers
 	const int nDisks_per_side = 5;
-	const int do_projections =  0;
+	const int do_projections =  1;
 	// Parameters for projections
 	string projname1   = "DIRC";            // Cylindrical surface object name
 	double projradius1 = 95;// 100;//112;// 80.;               // [cm] 
@@ -162,15 +162,15 @@ void Fun4All_G4_ProjectiveHybrid(
 	double thinness    = 0.01;               // black hole thickness, needs to be taken into account for the z positions
 	// ---
 	string projname2   = "FOR";             // Forward plane object name
-	double projzpos2   = 155+thinness/2;//315+thinness/2.;   // [cm]
-	double projradius2 = 95;//210.;               // [cm]
+	double projzpos2   = 154+thinness/2;//315+thinness/2.;   // [cm]
+	double projradius2 = 110;//210.;               // [cm]
 	// ---
 	string projname3   = "BACK";            // Backward plane object name
-	double projzpos3   = -(137+thinness/2.);// [cm]
+	double projzpos3   = -(136+thinness/2.);// [cm]
 	double projradius3 = 95.;               // [cm]
 	// ---
 	string projname4   = "FOREXIT";            // Backward plane object name
-	double projzpos4   = 301;// [cm]
+	double projzpos4   = 342;// [cm]
 	double projradius4 = 200.;               // [cm]
 	// ======================================================================================================
 	// Make the Server
@@ -461,7 +461,8 @@ void Fun4All_G4_ProjectiveHybrid(
 	#endif
 
 	#ifdef _RICH_
-	EicFRichSubsystem *RICH = new EicFRichSubsystem("RICH");
+	//EicFRichSubsystem *RICH = new EicFRichSubsystem("RICH");
+	dRICH_Subsystem *RICH = new dRICH_Subsystem("RICH");
 	g4Reco->registerSubsystem(RICH);
 	#endif
 	
@@ -530,9 +531,10 @@ void Fun4All_G4_ProjectiveHybrid(
                 example01->SuperDetector("BMT");
                 example01->set_int_param("lengthviarapidity",0);
                 
-		//if (ilayer < 2) bmt_length = bmt_length_inner;
-		//else bmt_length = bmt_length_outer;
-		bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*BMT_r[ilayer];
+		if (ilayer < 2) bmt_length = bmt_length_inner;
+		else bmt_length = bmt_length_outer;
+		//bmt_length = (1-exp(-2*prapidity))/exp(-prapidity)*BMT_r[ilayer];
+		
 		example01->set_double_param("length", bmt_length);
                 example01->set_double_param("deadzone", 0.2);
                 example01->set_int_param("nhit", 2);
@@ -563,23 +565,28 @@ void Fun4All_G4_ProjectiveHybrid(
 	        //Array definition: Params[] = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
 	   
 		//New Design for projective Central tracker with eta = 1.1
-	    	array<double,6> Params = FullGEMParameters(690, 1.241, 10*(RadiusFromZEta(69, 2.5)+2), 12);
+	    	double GEM_Z[3] = {40, 85, 130};
+	    	//double GEM_Z[4] = {40, 70, 100, 130};
+		
+		array<double,6> Params = FullGEMParameters(10*GEM_Z[0], 1.15, 10*(RadiusFromZEta(GEM_Z[0], 2.5)+2), 12);
 		MakeGEM(Params, fgt);
-		Params = FullGEMParameters(1060, 1.208, 10*(RadiusFromZEta(106, 2.5)+2), 12);
+		Params = FullGEMParameters(10*GEM_Z[1], 1.15, 10*(RadiusFromZEta(GEM_Z[1], 2.5)+2), 12);
 		MakeGEM(Params, fgt);
-		//Params = FullGEMParameters(1430, 1.25, 10*(RadiusFromZEta(143, 2.5)+2), 12);
-		Params = FullGEMParameters(1300, 1.197, 10*(RadiusFromZEta(130, 2.5)+2), 12);
+		Params = FullGEMParameters(10*GEM_Z[2], 1.15, 10*(RadiusFromZEta(GEM_Z[2], 2.5)+2), 12);
 		MakeGEM(Params, fgt);
+		//Params = FullGEMParameters(10*GEM_Z[3], 1.15, 10*(RadiusFromZEta(GEM_Z[3], 2.5)+2), 12);
+		//MakeGEM(Params, fgt);
 	    
 
 			
-		Params = FullGEMParameters(-690, 1.241, 10*(RadiusFromZEta(69, 2.5)+2), 12);
+		Params = FullGEMParameters(-10*GEM_Z[0], 1.15, 10*(RadiusFromZEta(GEM_Z[0], 2.5)+2), 12);
 		MakeGEM(Params, fgt);
-		Params = FullGEMParameters(-1060, 1.208, 10*(RadiusFromZEta(106, 2.5)+2), 12);
+		Params = FullGEMParameters(-10*GEM_Z[1], 1.15, 10*(RadiusFromZEta(GEM_Z[1], 2.5)+2), 12);
 		MakeGEM(Params, fgt);
-		//Params = FullGEMParameters(-1430, 1.25, 10*(RadiusFromZEta(143, 2.5)+2), 12);
-		Params = FullGEMParameters(-1300, 1.197, 10*(RadiusFromZEta(130, 2.5)+2), 12);
+		Params = FullGEMParameters(-10*GEM_Z[2], 1.15, 10*(RadiusFromZEta(GEM_Z[2], 2.5)+2), 12);
 		MakeGEM(Params, fgt);
+		//Params = FullGEMParameters(-10*GEM_Z[3], 1.15, 10*(RadiusFromZEta(GEM_Z[3], 2.5)+2), 12);
+		//MakeGEM(Params, fgt);
 		
 	
 		}
@@ -597,7 +604,7 @@ void Fun4All_G4_ProjectiveHybrid(
 	        //Array definition: Params[] = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
 
 	    	//Far Hadron Side GEM disk
-	    	array<double,6> Params = FullGEMParameters(3050, 1.2, 210, 12);
+	    	array<double,6> Params = FullGEMParameters(3450, 1.2, 210, 12);
 	    	MakeGEM(Params, fgt2);
 	    	Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    	//MakeGEM(Params, fgt2); 
