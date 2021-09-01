@@ -4,7 +4,7 @@
 ================================================================================================================
 */
 #pragma once
-#include "/eic/u/lukown/Simulations/WorkingDirectory/detector_setup.h"
+#include "/eic/u/lukown/NewSimulations/WorkingDirectory/detector_setup.h"
 #include <phgenfit/Track.h>
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllDstOutputManager.h>
@@ -166,7 +166,7 @@ void Fun4All_G4_ProjectiveHybrid(
 	double projradius2 = 110;//210.;               // [cm]
 	// ---
 	string projname3   = "BACK";            // Backward plane object name
-	double projzpos3   = -(136+thinness/2.);// [cm]
+	double projzpos3   = -(137+thinness/2.);// [cm]
 	double projradius3 = 95.;               // [cm]
 	// ---
 	string projname4   = "FOREXIT";            // Backward plane object name
@@ -383,8 +383,28 @@ void Fun4All_G4_ProjectiveHybrid(
 	//double si_z_pos[] = {-143., -115.5, -88., -60.5, -33, 33, 60.5, 88, 115.5, 143 };
 	
 	//Asymmetric expanded spacing 
-	double si_z_pos[] = {-135., -109.5, -84., -58.5, -33, 33, 63., 93., 123., 153 };
+	//double si_z_pos[] = {-135., -109.5, -84., -58.5, -33, 33, 63., 93., 123., 153 };
 	
+	double si_z_pos[10];
+	double SIZMin = 41;
+	for (int i = 0; i < 10; i++)
+	{
+		if (i < 5)
+		{
+			double SINegSpacing = (135-SIZMin)/4;
+			si_z_pos[i] = -135 + SINegSpacing*i;
+		}
+		else
+		{
+			double SIPosSpacing = (153-SIZMin)/4;
+			si_z_pos[i] = SIZMin + SIPosSpacing*(i-5);
+		}
+	}
+	
+	
+	for (int j = 0 ; j< 10; j++) { cout << "Disk "<< j+1 << " : " << si_z_pos[j] << endl;}
+
+
 	//original projective
 	//double si_z_pos[] = {-121., -99., -77., -55., -33.0, 33.0, 55., 77., 99., 121.};
   	const int nDisks = sizeof(si_z_pos)/sizeof(*si_z_pos);
@@ -417,11 +437,14 @@ void Fun4All_G4_ProjectiveHybrid(
 	
 	}
 	#endif
-		
+	
+	
 	#ifdef _ALSUPP_
 	// Al Support Structure
 	Al_support_Subsystem *Al_supp = new Al_support_Subsystem("Al_supp");
 	g4Reco->registerSubsystem(Al_supp);	
+
+
 	//Experimental GEM Support
 	GEM_support_Subsystem *GEM_supp = new GEM_support_Subsystem("GEM_supp");
 	g4Reco->registerSubsystem(GEM_supp);	
@@ -452,7 +475,7 @@ void Fun4All_G4_ProjectiveHybrid(
 		g4Reco->registerSubsystem(cyl);	
 	}
 	#endif	
-	
+
 	//---------------------------
 	// Black hole to suck loopers out of their misery
 	#ifdef _BLACKHOLE_
@@ -492,12 +515,23 @@ void Fun4All_G4_ProjectiveHybrid(
         }
   //double BMT_r[6] = {20., 20.+nCZlayer*thicknessMPGD+gap_betweenCZ+Gap_betweenlayer, 50-nCZlayer*thicknessMPGD-gap_betweenCZ-Gap_betweenlayer/2, 50\
 +Gap_betweenlayer/2, 80-(nCZlayer*thicknessMPGD+gap_betweenCZ)*2-Gap_betweenlayer, 80-nCZlayer*thicknessMPGD-gap_betweenCZ};                          
-  	double BMT_r[6] = {    47.7153, 49.5718, 71.8958, 73.7523, 75.6088, 77.4653  };
+  	//double BMT_r[6] = {    47.7153, 49.5718, 71.8958, 73.7523, 75.6088, 77.4653  };
   	
+	//spacing between layers: 1.8565cm 
+	//
+	//Two layers centered on 50cm and 76cm -> corresponding to approximately 210cm length for outer, and 140 for inner
+	double BMT_r[4] = {  49.07175, 50.92825, 75.07175, 76.92825 };
+  	
+	//double BMT_r[5] = {    47.7153, 49.5718, 73.7523, 75.6088, 77.4653  };
+	//double BMT_r[4] = {    47.7153, 49.5718, 75.6088, 77.4653  };
+  	
+	/*
 	for (int iScale = 0; iScale < 6; iScale++)
 	{
+		//may want to actually scale only two values in the array, but maintain the spacing betwen layers in groups
 		BMT_r[iScale] = BMT_r[iScale]*1.2;
 	}
+	*/
 
 	//double BMT_r[4] = {   71.8958, 73.7523, 75.6088, 77.4653  };
 
@@ -514,13 +548,17 @@ void Fun4All_G4_ProjectiveHybrid(
 	//double bmt_length_inner = (1-exp(-2*prapidity))/exp(-prapidity)*50*1.226 - 10;
         //double bmt_length_outer = (1-exp(-2*prapidity))/exp(-prapidity)*78*1.226 - 17;
         double bmt_length;
-        
+
+	cout << "BMT Inner: " << bmt_length_inner << endl;
+	cout << "BMT Outer: " << bmt_length_outer << endl;
+       
+ 
 	//const double prapidity =1.0;
         //double bmt_length_inner, bmt_length_outer;
 	//double bmt_length = bmt_length_inner = bmt_length_outer = (1-exp(-2*prapidity))/exp(-prapidity)*80;
 	//double bmt_length = 250;
         
-	for (int ilayer = 0; ilayer< 6; ilayer++){
+	for (int ilayer = 0; ilayer< 4; ilayer++){
                 example01 = new PHG4CylinderStripSubsystem("BMT",ilayer);
                 example01->set_double_param("radius", BMT_r[ilayer]);
                 example01->set_string_param("gas", "myMMGas");
@@ -565,30 +603,42 @@ void Fun4All_G4_ProjectiveHybrid(
 	        //Array definition: Params[] = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
 	   
 		//New Design for projective Central tracker with eta = 1.1
-	    	double GEM_Z[3] = {40, 85, 130};
-	    	//double GEM_Z[4] = {40, 70, 100, 130};
-		
-		array<double,6> Params = FullGEMParameters(10*GEM_Z[0], 1.15, 10*(RadiusFromZEta(GEM_Z[0], 2.5)+2), 12);
-		MakeGEM(Params, fgt);
-		Params = FullGEMParameters(10*GEM_Z[1], 1.15, 10*(RadiusFromZEta(GEM_Z[1], 2.5)+2), 12);
-		MakeGEM(Params, fgt);
-		Params = FullGEMParameters(10*GEM_Z[2], 1.15, 10*(RadiusFromZEta(GEM_Z[2], 2.5)+2), 12);
-		MakeGEM(Params, fgt);
-		//Params = FullGEMParameters(10*GEM_Z[3], 1.15, 10*(RadiusFromZEta(GEM_Z[3], 2.5)+2), 12);
-		//MakeGEM(Params, fgt);
-	    
+	    	//double GEM_Z[3] = {69, 106, 143};
 
-			
-		Params = FullGEMParameters(-10*GEM_Z[0], 1.15, 10*(RadiusFromZEta(GEM_Z[0], 2.5)+2), 12);
-		MakeGEM(Params, fgt);
-		Params = FullGEMParameters(-10*GEM_Z[1], 1.15, 10*(RadiusFromZEta(GEM_Z[1], 2.5)+2), 12);
-		MakeGEM(Params, fgt);
-		Params = FullGEMParameters(-10*GEM_Z[2], 1.15, 10*(RadiusFromZEta(GEM_Z[2], 2.5)+2), 12);
-		MakeGEM(Params, fgt);
-		//Params = FullGEMParameters(-10*GEM_Z[3], 1.15, 10*(RadiusFromZEta(GEM_Z[3], 2.5)+2), 12);
-		//MakeGEM(Params, fgt);
-		
-	
+		int NumberOfGEMS = 3; 
+		double ZStart = 90.0;
+	    	double ForwardZSpacing = (153-ZStart)/(NumberOfGEMS-1);//34.333;
+		double BackwardZSpacing = (135-ZStart)/(NumberOfGEMS-1);//28.333;
+		//double GEM_Z[4] = {40, 70, 100, 130};
+
+
+
+		double ZPos = ZStart;		
+
+
+		array<double,6> Params = FullGEMParameters(10*ZPos, 1.15, 10*(RadiusFromZEta(ZPos, 2.5)+2), 12);
+		for (int iGEM = 0; iGEM < NumberOfGEMS; iGEM++)
+		{
+			double TEMPZPos = 0;
+			ZPos = ZStart+(iGEM*ForwardZSpacing);
+			if (ZPos <= 130) TEMPZPos = ZPos;
+			else TEMPZPos = 130;
+			Params = FullGEMParameters(10*(TEMPZPos), 1.15, 10*(RadiusFromZEta(ZPos, 2.5)+2), 12);
+			Params[4]=10*(ZPos); //Copying previous parameters but shifting in Z
+			MakeGEM(Params, fgt);
+		}
+		for (int iGEM = 0; iGEM < NumberOfGEMS; iGEM++)
+		{
+			double TEMPZPos = 0;
+			ZPos = -1*ZStart-(iGEM*BackwardZSpacing);
+			if (ZPos >= -130) TEMPZPos = ZPos;
+			else TEMPZPos = -130;
+			Params = FullGEMParameters(10*(TEMPZPos), 1.15, 10*(RadiusFromZEta(ZPos, 2.5)+2), 12);
+			Params[4]=10*(ZPos); //Copying previous parameters but shifting in Z
+			MakeGEM(Params, fgt);
+		}
+
+
 		}
  	        g4Reco->registerSubsystem(fgt);
 	}
