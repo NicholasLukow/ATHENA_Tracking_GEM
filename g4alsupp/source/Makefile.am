@@ -21,12 +21,12 @@ libg4alsupp_la_LIBADD = \
   -lg4testbench 
 
 pkginclude_HEADERS = \
-  Al_support_Subsystem.h
+  Al_support_Subsystem.h 
 
 libg4alsupp_la_SOURCES = \
   Al_support_Detector.cc \
   Al_support_Subsystem.cc \
-  Al_support_SteppingAction.cc
+  Al_support_SteppingAction.cc 
 
 ################################################
 # linking tests

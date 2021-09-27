@@ -59,15 +59,51 @@ void Al_support_Detector::Print(const std::string &what) const
 // ======================================================================================================
 void  Al_support_Detector::addDetectorSection( G4LogicalVolume *logicWorld , std::string name , double sign){
 
-	double z_det[3] = {20.,25.375, 121.};
-        double rin  [3] = {16.47 * 20.0 / 22.0, 19.0,19.0};
-	double rout [3] = {0};
+	//double z_det[3] = {20.,46.75, 121.};
+        //double rin  [3] = {7.13 * 20 / 22.0, 19.0,19.0};
+	//double z_det[3] = {16.8,25.375, 121.};
+        //double rin  [3] = {16.47 * 16.8 / 22.0, 19.0,19.0};
+	
+	//Projective 2.5 cone (expanded to outermost GEM)
+	//double z_det[3] = {22, 55, 143};
+        //double rin  [3] = {3.63, 9.10,23.64};
+	
+	//Projective 2.5 cone (expanded to outermost GEM) mRICH at -137
+	//double z_det_temp[4] = {22, 153, -22, -135};
+        //double rin_temp  [4] = {3.63, 25.29, 3.63, 22.31};
+
+	//Symmetric 145, B2P2N2, projective at 2
+	//double z_det_temp[4] = {85, 145, -85, -145};
+        //double rin_temp  [4] = {23.44, 39.98, 23.44, 39.98};
+	
+	//Asymmetric, B2P2N2, projective at 2
+	double z_det_temp[4] = {85, 170, -85, -150};
+        double rin_temp  [4] = {23.44, 46.87, 23.44, 41.36};
+	
+	//clyinder instead of projective cone
+	//double z_det_temp[4] = {85, 170, -85, -150};
+        //double rin_temp  [4] = {41.36, 41.36, 41.36, 41.36};
+
+	
+	//mRICH at -200
+	//double z_det_temp[4] = {22, 153, -22, -198};
+        //double rin_temp  [4] = {3.63, 25.29, 3.63, 32.73};
+	
+	double z_det[2] = {0, 0};//153, -22, -135};
+        double rin  [2] = {0,0};//3.63, 25.29, 3.63, 22.31};
+	
+	//double z_det[3] = {22, 55, 121.};
+        //double rin  [3] = {3.63, 9.10,20.0};
+	
+	double rout [2] = {0};
 	const int nzplanes = sizeof(z_det)/sizeof(*z_det);
-	for(int i = 0 ; i < nzplanes ; i++){
-		rout[i] = rin[i] + 0.5;
-		z_det[i] *= 10.*sign/abs(sign);
-		rin  [i] *= 10.;
-		rout [i] *= 10.;
+	//for(int i = 0 ; i < nzplanes ; i++){
+	for(int i = 0 ; i < 2 ; i++){
+		int index = i + 1-sign;
+		rout[i] = rin_temp[index] + 0.5;
+		z_det[i] = z_det_temp[index]*10.;
+		rin  [i] = rin_temp[index]*10.;
+		rout [i] = rout[i]*10.;
 	}
 
 	G4Material * G4_mat = G4Material::GetMaterial("G4_Al");
