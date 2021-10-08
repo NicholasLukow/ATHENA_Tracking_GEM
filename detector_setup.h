@@ -1,9 +1,9 @@
 //Beam pipe                                                                                                                                           
+#define _PROJECTION_ 0
 
 #define _BEAMPIPE_ //comment out this line for no beam pipe                                                                                           
 
 //Silicon Barrel                                                                                                                                      
-//For current version, both the vertexing layers and the barrel layers are attached to this
 #define _SIBARR_ //comment out this line for no silicon barrel                                                                                        
 
 //Silicon Vertex
@@ -15,10 +15,19 @@
 
 //Silicon Disks                                                                                                                                       
 #define _SIDISKS_
-//#define _ALSUPP_
+
+//support Structure
+#define _ALSUPP_
+
+//Mini-TPC
+//#define _TPC_
+
 
 //RICH
-#define _RICH_
+//#define _RICH_
+
+//MRICH
+//#define _MRICH_
 
 //DIRC
 //#define _DIRC_
@@ -29,7 +38,8 @@
 
 
 //GEMS                                                                                                                                                
-#define _GEMS_
+#define _INNERGEMS_
+//#define _OUTERGEMS_
 
 //Black holes to catch all hits outside of volume                                                                                                     
 #define _BLACKHOLE_                                                                                                                                
