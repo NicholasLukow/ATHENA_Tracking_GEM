@@ -147,7 +147,7 @@ void Fun4All_G4_Baseline2(
 			double etamin = -3.7,
 			double etamax = 3.7,
 			int generatorVersion = 1, 		// Generator setting
-			int magnetic_field = 6, 		// Magnetic field setting
+			int magnetic_field = 8, 		// Magnetic field setting
 			TString out_name = "TEST")	// output filename
 {	
 	// ======================================================================================================
@@ -253,6 +253,30 @@ void Fun4All_G4_Baseline2(
 		B_label = "_ATHENA0507Shifted";
 		g4Reco->set_field_map( string("../BeastMagneticField/data/ATHENA0507_Shifted.Bmap"), PHFieldConfig::kFieldBeast);
 	}
+	else if(magnetic_field==8){     // updated BeAST 3.0T map
+		B_label = "_ATHENA0921";
+		g4Reco->set_field_map( string("../BeastMagneticField/data/ATHENA0921.Bmap"), PHFieldConfig::kFieldBeast);
+	}
+	else if(magnetic_field==9){     // updated BeAST 3.0T map
+		B_label = "_Scaled5TATHENA0921";
+		g4Reco->set_field_map( string("../BeastMagneticField/data/5TATHENA0921.Bmap"), PHFieldConfig::kFieldBeast);
+	}
+	else if(magnetic_field==10){     // updated BeAST 3.0T map
+		B_label = "_Scaled10TATHENA0921";
+		g4Reco->set_field_map( string("../BeastMagneticField/data/10TATHENA0921.Bmap"), PHFieldConfig::kFieldBeast);
+	}
+	else if(magnetic_field==11){     // uniform 3.0T
+		B_label = "_B_5.0T";
+		g4Reco->set_field(5.0);
+	}
+	else if(magnetic_field==12){     // updated BeAST 3.0T map
+		B_label = "_Scaled1TATHENA0921";
+		g4Reco->set_field_map( string("../BeastMagneticField/data/1TATHENA0921.Bmap"), PHFieldConfig::kFieldBeast);
+	}
+	else if(magnetic_field==13){     // updated BeAST 3.0T map
+		B_label = "_Scaled2TATHENA0921";
+		g4Reco->set_field_map( string("../BeastMagneticField/data/2TATHENA0921.Bmap"), PHFieldConfig::kFieldBeast);
+	}
 	else{                           // The user did not provide a valid B field setting
 		cout << "User did not provide a valid magnetic field setting. Set 'magnetic_field'. Bailing out!" << endl;
 	}	
@@ -337,7 +361,8 @@ void Fun4All_G4_Baseline2(
 	#ifdef _SIVTX_
 	//---------------------------
 	// Vertexing
-	double si_vtx_r_pos[] = {3.3,4.41,5.51};
+	double si_vtx_r_pos[] = {3.3,4.35,5.4};
+	//double si_vtx_r_pos[] = {3.3,4.41,5.51};
 	const int nVtxLayers = sizeof(si_vtx_r_pos)/sizeof(*si_vtx_r_pos);
 	//double si_z_vtxlength[] = {42.0, 42.0, 42.0};
 	double si_z_vtxlength[] = {28, 28, 28};
@@ -361,19 +386,21 @@ void Fun4All_G4_Baseline2(
 	#ifdef _SIBARR_
 	//---------------------------
 	// Barrel
-	double si_r_pos[] = {13.38, 18.0};
+	double si_r_pos[] = {13.34, 17.96};
 	const int nTrckLayers = sizeof(si_r_pos)/sizeof(*si_r_pos);
         
 	//projective Si Barrel
 	double barr_prapidity = 1.1;
 	double si_barr_length_1 = (1-exp(-2*barr_prapidity))/exp(-barr_prapidity)*si_r_pos[0];
 	double si_barr_length_2 = (1-exp(-2*barr_prapidity))/exp(-barr_prapidity)*si_r_pos[1];
-	double si_z_length[] = {si_barr_length_1, si_barr_length_2};
+	//double si_z_length[] = {si_barr_length_1, si_barr_length_2};
+	double si_z_length[] = {34.34, 46.68};
 
 	//hardcoding the barrel parameters (as long as barr_prapidity is 1.1, these values are already used)
 	//si_z_length[] = {35.74, 48.08};
 
-	cout << "LENGTHS OF SI BARR: " << si_barr_length_1 << " , " << si_barr_length_2 << endl;
+	//cout << "LENGTHS OF SI BARR: " << si_barr_length_1 << " , " << si_barr_length_2 << endl;
+	cout << "LENGTHS OF SI BARR: " << si_z_length[0] << " , " << si_z_length[1] << endl;
 	
 	//double si_z_length[] = {84.0, 84.0};
 	//double si_thick_bar = barr_matBud/100.*9.37;
@@ -385,7 +412,7 @@ void Fun4All_G4_Baseline2(
 		cyl->set_double_param("radius"   , si_r_pos[ilayer]   );
 		cyl->set_double_param("thickness", si_thick_bar       );
 		cyl->set_double_param("place_z"  , 0                  );
-		cyl->set_double_param("length"   , si_z_length[ilayer] - 4);
+		cyl->set_double_param("length"   , si_z_length[ilayer] );
 		cyl->SetActive();
 		cyl->SuperDetector("BARR");
 		cyl->set_color(0,0.5,1);
@@ -410,7 +437,7 @@ void Fun4All_G4_Baseline2(
 	//Asymmetric expanded spacing 
 	//double si_z_pos[] = {-135., -109.5, -84., -58.5, -33, 33, 63., 93., 123., 153 };
 	
-	double si_z_pos[11] = {-145, -109, -73, -49, -25, 25, 49, 73, 103.67, 134.33, 165};
+	double si_z_pos[11] = {-145, -109, -73, -49, -25, 25, 49, 73, 103.65, 134.33, 165};
 /*
 	double SIZMin = 17;//41;
 	for (int i = 0; i < 6; i++)
@@ -438,7 +465,7 @@ void Fun4All_G4_Baseline2(
 	//double si_z_pos[] = {-121., -99., -77., -55., -33.0, 33.0, 55., 77., 99., 121.};
   	const int nDisks = sizeof(si_z_pos)/sizeof(*si_z_pos);
   	//double si_r_max[] = {19.0, 19.0, 19.0, 19.0, 7.13, 7.13, 19.0, 19.0, 19.0, 19.0};
-  	double si_r_max[11]= {43.23, 43.23, 43.23, 36.26, 18.5, 18.5, 36.26, 43.23, 43.23, 43.23, 43.23};
+  	double si_r_max[11]= {43.23, 43.23, 43.23, 36.50, 18.62, 18.62, 36.50, 43.23, 43.23, 43.23, 43.23};
 /*
 	for (int iDisk = 0 ; iDisk < nDisks; iDisk++)
 	{
@@ -462,8 +489,13 @@ void Fun4All_G4_Baseline2(
 	//double si_r_min[] = {5.91, 4.7, 3.5, 3.18, 3.18, 3.18, 3.18, 3.5, 4.7, 5.91};
 	//Order changed from low z to high z -> in to out in neg, then in to out in pos
 	//double si_r_min[] = { 3.18, 3.18, 4.75, 3.18, 3.18, 6.75};
+	
+
 	//hardcode baseline 2
-	double si_r_min[] = {7.15, 6.25, 3.5, 3.18, 3.18, 3.18, 3.18, 3.5, 8, 10, 11};
+	//double si_r_min[] = {7.15, 6.25, 3.18, 3.18, 3.18, 3.18, 3.18, 3.5, 8, 10, 11};
+	
+	//Ernst values
+	double si_r_min[] = {5.26, 3.95, 3.18, 3.18, 3.18, 3.18, 3.18, 3.47, 5.08, 6.58, 8.16};
 	
 	//modifying the rear si disks for the study with multiple distances
 	//for (int i = 0; i < 4; i++)
@@ -577,7 +609,7 @@ void Fun4All_G4_Baseline2(
 	//double BMT_r[4] = {  49.07175, 50.92825, 75.07175, 76.92825 };
 
 	//B2P2N2 4 Layers	
-	double BMT_r[4] = {47.72, 49.57, 75.61, 77.47};
+	double BMT_r[4] = {47.72, 49.57, 75.61, 77.46};
 
 	//double BMT_r[5] = {  49.07175, 50.92825, 73.21525, 75.07175, 76.92825 };
 	//double BMT_r[6] = {  49.07175, 50.92825, 71.35875, 73.21525, 75.07175, 76.92825 };
@@ -667,28 +699,33 @@ void Fun4All_G4_Baseline2(
 	   
 		//New Design for projective Central tracker with eta = 1.1
 	    	//double GEM_Z[3] = {69, 106, 143};
-	
 
-		double EtaMinForRing = EtaFromZR(103, 75.5 + 5 + 3 );	
-		cout << "Eta Min for GEM Ring: " << EtaMinForRing << endl;
-		double EtaForRearOuterRing = EtaFromZR(144.5, 92);		
-		double EtaForForwardOuterRing = EtaFromZR(164.5, 92);		
-	
+		double RMax = 96.8;// previously 92	
+
+		double EtaMinForRearRing = EtaFromZR(103, RMax );	 //previously 83.5
+		double EtaMinForForwardRing = EtaFromZR(105.76, RMax );	 //previously 83.5
+		//cout << "Eta Min for GEM Ring: " << EtaMinForRing << endl;
+		double EtaForRearOuterRing = EtaFromZR(141.74, RMax );  //previously 92		
+		double EtaForForwardOuterRing = EtaFromZR(161.74, RMax );		
+		int NModulesPerDisk = 12;	
+
 		//array<double,6> Params = FullGEMParameters(10*(-102), 1.1, 10*(43.5-1), 12);
-		array<double,6> Params = FullGEMParameters(10*(-103), EtaMinForRing, 10*(43.5+1), 12);
+		array<double,6> Params = FullGEMParameters(10*(-103), EtaMinForRearRing, 10*(43.68+1), NModulesPerDisk);
 	    	cout << "Rear Ring 1 Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
 		MakeGEM(Params, fgt);
-		Params = FullGEMParameters(10*(-144.5), EtaForRearOuterRing, 10*(43.5+1), 12);
-	    	//Params[4] = 10*(-144.5);
-		cout << "Rear Ring 2 Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
+		Params = FullGEMParameters(10*(-141.74), EtaForRearOuterRing, 10*(43.68+1), NModulesPerDisk);
+		//cout << "Rear Ring 2 Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
+		//cout << "Ring Modules: " << NModulesPerDisk << endl;
+      		//cout << "Rear Ring 2 Active Height: " << Params[0]/10.0 << endl;
+		//cout << "Rear Ring 2 Width: " << Params[2]/10.0 << endl;
 		MakeGEM(Params, fgt);
+	    	cout << "Rear Ring 2 Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
 		
-		Params = FullGEMParameters(10*(103), EtaMinForRing, 10*(43.5+1), 12);
-	    	cout << "Forward Ring 1 Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
+		Params = FullGEMParameters(10*(105.76), EtaMinForForwardRing, 10*(43.68+1), NModulesPerDisk);
+	    	cout << "Fwd Ring 1 Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
 		MakeGEM(Params, fgt);
-		Params = FullGEMParameters(10*(164.5), EtaForForwardOuterRing, 10*(43.5+1), 12);
-	    	//Params[4] = 10*164.5;
-		cout << "Forward Ring 1 Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
+		Params = FullGEMParameters(10*(161.74), EtaForForwardOuterRing, 10*(43.68+1), NModulesPerDisk);
+	    	cout << "Fwd Ring 2 Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
 		MakeGEM(Params, fgt);
 
 /*
@@ -751,18 +788,18 @@ void Fun4All_G4_Baseline2(
 	        //Array definition: Params[] = {ActiveHeight, CenterRadius, TopWidth, BottomWidth, Z, NModules};
 
 	    	//Far Hadron Side GEM disk
-	    	array<double,6> Params = FullGEMParameters(3620, 1.2, 210, 12);
+	    	array<double,6> Params = FullGEMParameters(3320, 1.2485, 193.5, 12);
 	    	cout << "Forward Disk Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
 	    	MakeGEM(Params, fgt2);
 	    	//Params[4]=Params[4]+50; //Copying previous parameters but shifting in Z
 	    	//MakeGEM(Params, fgt2); 
 
-       		cout << "Length: " << Params[0] + 210 << endl; 
-	    cout << "Outer Disk Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
+       	//	cout << "Length: " << Params[0] + 210 << endl; 
+	    //cout << "Outer Disk Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
 		//Far Electron Side GEM disk
-	    	Params = FullGEMParameters(-1900, 1.1, 110, 12);
-	    	cout << "Rear Disk Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
-	    	MakeGEM(Params, fgt2);
+	   // 	Params = FullGEMParameters(-1900, 1.1, 110, 12);
+	  //  	cout << "Rear Disk Active radius: " << Params[1] - Params[0]/2 << " to " << Params[1] + Params[0]/2 << endl;	
+	    	//MakeGEM(Params, fgt2);
 			
 		//	cout << "Top Width: " << Params[2] << endl;
        		//	cout << "Length: " << Params[0] + 210 << endl; 
